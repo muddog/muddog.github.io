@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" >
+  <link rel="dns-prefetch" href="http://muddog.github.io">
+  <title>MudDog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="Linux &amp; IoT">
+<meta property="og:type" content="website">
+<meta property="og:title" content="MudDog">
+<meta property="og:url" content="http://muddog.github.io/index.html">
+<meta property="og:site_name" content="MudDog">
+<meta property="og:description" content="Linux &amp; IoT">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="MudDog">
+<meta name="twitter:description" content="Linux &amp; IoT">
+  
+    <link rel="alternative" href="/atom.xml" title="MudDog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link rel="stylesheet" href="/main.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div class="left-col">
+      <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			<img src="/avatar.png" class="js-avatar">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">豆芽</a></h1>
+		</hgroup>
+
+		
+
+		<nav class="header-menu">
+			<ul>
+			
+				<li><a href="/">Home</a></li>
+	        
+				<li><a href="/tags/IoT">IoT</a></li>
+	        
+				<li><a href="/tags/embeded">Embeded</a></li>
+	        
+				<li><a href="/tags/photo">Photograph</a></li>
+	        
+			</ul>
+		</nav>
+		<nav class="header-smart-menu">
+	        
+    		
+    			
+    			<a class="js-smart-menu" data-idx="0" href="javascript:void(0)">所有文章</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="1" href="javascript:void(0)">标签</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="2" href="javascript:void(0)">关于我</a>
+    			
+    			
+            
+		</nav>
+		<nav class="header-nav">
+			<div class="social">
+				
+					<a class="github" target="_blank" href="https://github.com/muddog" title="github">github</a>
+		        
+					<a class="weibo" target="_blank" href="http://weibo.com/muddogxp/" title="weibo">weibo</a>
+		        
+					<a class="zhihu" target="_blank" href="https://www.zhihu.com/people/muddog" title="zhihu">zhihu</a>
+		        
+					<a class="linkedin" target="_blank" href="http://www.linkedin.com/in/xinyu-chen-eric" title="linkedin">linkedin</a>
+		        
+			</div>
+		</nav>
+	</header>		
+</div>
+
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"><i class="icon-list"></i></div>
+  		<h1 class="header-author js-mobile-header hide">豆芽</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				
+					<img src="/avatar.png" class="js-avatar">
+				
+			</div>
+			<hgroup>
+			  <h1 class="header-author">豆芽</h1>
+			</hgroup>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">Home</a></li>
+		        
+					<li><a href="/tags/IoT">IoT</a></li>
+		        
+					<li><a href="/tags/embeded">Embeded</a></li>
+		        
+					<li><a href="/tags/photo">Photograph</a></li>
+		        
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+						<a class="github" target="_blank" href="https://github.com/muddog" title="github">github</a>
+			        
+						<a class="weibo" target="_blank" href="http://weibo.com/muddogxp/" title="weibo">weibo</a>
+			        
+						<a class="zhihu" target="_blank" href="https://www.zhihu.com/people/muddog" title="zhihu">zhihu</a>
+			        
+						<a class="linkedin" target="_blank" href="http://www.linkedin.com/in/xinyu-chen-eric" title="linkedin">linkedin</a>
+			        
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+
+      <div class="body-wrap">
+        
+  
+    <article id="post-IoT-RTOS" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/11/12/IoT-RTOS/">IoT的那些操作系统</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="引子"><a href="#引子" class="headerlink" title="引子"></a>引子</h1><p>IoT(Internet of Things)一直是个市场没爆发，但炒作够火的概念。 最近看了Brillo（Goolge放出的OS for IoT），再结合手头做的项目，来聊聊打着IoT旗号的那些操作系统及其生态。可以让大家在对此类嵌入式系统软件平台选型时少些困惑。</p>
+<p>首先，不在这里描述IoT到底是啥，这概念太笼统。但凡事都讲套路，在我看来大部分的IoT操作系统都是顺着这个套路（应用场景）来：</p>
+<pre><code>    Internet            PAN
+Cloud &lt;-&gt; Board router &lt;-&gt; Nodes (things connected)
+   ^          ^             ^
+   |          |             |
+    ---- Smart device ------
+      (e.g. phone, tablet)
+</code></pre><p>这场景基本适用于家庭、楼宇及工业等等。所以哪家提啥方案都可以按这个套路来，下面你会看的到。文中我们会谈到以下这些OS：</p>
+<ul>
+<li>Brillo (a solution from Google for building connected devices)</li>
+<li>mbedOS (ARM mbed, The ARM IoT Device Platform)</li>
+<li>RIOT (The friendly Operating System for the IoT)</li>
+<li>Contiki (an open source operating system for the IoT)</li>
+<li>Zephyr (a small, scalable real-time operating system for use on resource-constrained systems)</li>
+<li>Nuttx (a RTOS with an emphasis on standards compliance and small footprint)</li>
+</ul>
+<p>除了单独对这些OS介绍外，我们也会来个横向大比拼。目的是让项目负责人，产品经理在对系统选型的时候能有个合理的参考。嵌入式系统中，最好用，生态最好的当然是Linux。但当系统较小，能力不足以跑Linux的时候，就很容易纠结，特别是对于生态要求很高的应用。</p>
+<h1 id="Brillo"><a href="#Brillo" class="headerlink" title="Brillo"></a>Brillo</h1><p><a href="https://developers.google.com/brillo/" target="_blank" rel="external">https://developers.google.com/brillo/</a></p>
+<blockquote>
+<p>Brillo: Google’s OS for IoT MPU devices<br>• Targeted at smart homes<br>• Expanding to buildings and industry<br>• Supports MPU devices w/ min 35MB of RAM</p>
+</blockquote>
+<p>Brillo需要跑在带MMU的AP上。其实很显然，Brillo基于Android，它再怎么裁剪，也是需要跑在Linux，Kernel上还要打一堆patch。只是它把Android上关于图形、JAVA虚拟机及Framework统统裁减掉。只保留了C/C++运行环境，Binder IPC，SSL等网络安全必须组件。这也就意味着在Brillo上开发APP其实是Native的，而且驱动程序都由Android的那套HAL来做抽象，所以应用程序是直接和HAL、Lib来打交道。</p>
+<p><em>Brillo 架构框图</em><br><img src="IoT-RTOS/brillo_arch.jpg" alt="brillo architecture"></p>
+<p>看似Google放了个IoT的操作系统出来，实际Google目前专注于应用场景中功能相对强大的节点，或者边界节点Border Router这样的角色。最重要的是Google利用Weave打通了设备节点到Google云端的通道。Google实际上是用了最小的代价，实现了移动设备平台Android、物联网节点和自己的云端的互联互通。至于那些跑不了Brillo的节点怎么互联互通，Google交给其他人去考虑了，反正Brillo也支持6LowPan, Thread之类的协议。如果你写过Android HAL/Service，那么开发Brillo App易如反掌，直接调用Device HAL去操作设备；调用Weave API去做通讯。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> ret = hw_get_module(LIGHTS_HARDWARE_MODULE_ID, &amp;<span class="keyword">module</span>);</div><div class="line"><span class="keyword">if</span> (ret || !<span class="keyword">module</span>)</div><div class="line">    err(<span class="number">1</span>, <span class="string">"Failed to load %s"</span>, LIGHTS_HARDWARE_MODULE_ID);</div><div class="line">ret = <span class="keyword">module</span>-&gt;methods-&gt;open(<span class="keyword">module</span>,    </div><div class="line">                            LIGHT_ID_NOTIFICATIONS,</div><div class="line">                            <span class="keyword">reinterpret_cast</span>&lt;<span class="keyword">struct</span> <span class="keyword">hw_device_t</span>**&gt;(&amp;light_device));</div><div class="line"><span class="keyword">if</span> (ret || !light_device)</div><div class="line">    err(<span class="number">1</span>, <span class="string">"Failed to open %s"</span>, LIGHT_ID_NOTIFICATIONS);</div></pre></td></tr></table></figure>
+<p>以上代码调用HAL统一接口打开一个LIGHT设备，是不是很熟悉？然后起个Daemon,利用Weave API来接收从网络上来的XMPP请求，对设备进行配置或者状态监测。在云端和移动端，可以使用网页版的Weave Developers Console和Weave App来控制监测设备。<br>Brillo可以在资源较少的MPU上跑，35MB内存就行，老的ARM9估计也可以。它可建立很多低成本的设备节点，用来和智能设备、云端通讯，或者作为PAN内设备对外的桥梁Border router。Brillo可玩性应该很高，家里的PC机，路由器都可以拿来跑，生态系统强大。但致命缺点是，我们在天朝啊，你懂得。相信国内的BAT之类，会考虑移植，改造，变异。就如对Android一般。</p>
+<h1 id="mbedOS"><a href="#mbedOS" class="headerlink" title="mbedOS"></a>mbedOS</h1><p><a href="https://www.mbed.com/en" target="_blank" rel="external">https://www.mbed.com/en</a></p>
+<p>mbed是ARM自己建立的IoT解决方案平台</p>
+<blockquote>
+<p>The ARM mbed IoT Device Platform provides the operating system, cloud services, tools and developer ecosystem to make the creation and deployment of commercial, standards-based IoT solutions possible at scale.</p>
+</blockquote>
+<p>它被ARM分成三大部分</p>
+<ol>
+<li><strong>mbed Cloud</strong></li>
+<li><strong>mbed Device Connector</strong></li>
+<li><strong>mbed Client</strong></li>
+</ol>
+<p>ARM居然也自己搞了个Cloud，可以通过“mbed Device Connector”来访问连接到云端的设备。并提供网页版的Connector来管理设备，用户可以通过RESTful API over HTTP来写自己的APP。</p>
+<p>“mbed Client”的定义是这样的：</p>
+<blockquote>
+<p>a library that connects devices to mbed Device Connector Service</p>
+</blockquote>
+<p>看似比较奇怪，其实就是一套可以移植到各种操作系统上的，能够和mbed Device Connector Service通讯的，跑在硬件设备上的软件库。它使用基于UDP的CoAP协议来通讯，使用mbedTLS来实现安全连接，兼容LWM2M。</p>
+<p><em>mbed Client 架构框图</em><br><img src="IoT-RTOS/mbed_client.jpg" alt="mbed_client"></p>
+<p>说到这里，我们的主角mbedOS该登场了。ARM为了在基于ARM Cortex-M内核的硬件平台上实现对设备的操作，及通过Device Connector访问云端，它必须有一套可以支持mbed Client的软件解决方案。mbedOS既是基于RTOS内核，并提供各种ARM SoC硬件平台驱动和BSP的操作系统，在此之上，实现整个mbed Client库。在PAN的物联区域内，设备与设备的通讯都可以使用mbedOS提供的方案来解决，它支持NFC，RFID，BLE，6LowPAN甚至是Thread。在设备与云端的通讯上，mbedOS既支持以太网，WiFi，也支持3G。跑mbedOS的设备既可以是设备节点，也可以是边界路由器（比如6LowPAN转IPv6），也可以和智能设备通过BLE通讯。mbed Device Connector又可以使用CoAP协议在设备端和云端通讯。</p>
+<p>mbedOS对于网络的支持可谓很强大</p>
+<ul>
+<li>LWIP IPv4/v6, TCP/UDP</li>
+<li>mbed BLE stack</li>
+<li>6LowPAN (host, router, border router)</li>
+<li>Thread (ED, router, border router)</li>
+<li>BSD socket API</li>
+</ul>
+<p>除此之外，它还支持</p>
+<ul>
+<li>文件系统：cfstore, flash-journal等</li>
+<li>C++的驱动接口，及驱动抽象层HAL</li>
+<li>几乎所有使用ARM CortexM核的大厂硬件平台。广度可以，但深度有待提高</li>
+</ul>
+<p>也就是说mbed把每一类驱动都抽象成一个基类，真正做驱动移植的时候，从这个类派生出来，然后实现相应的HAL函数。使得用户在实例化该驱动派生类后，能够调用相应的类接口，从而访问实际的设备驱动程序。比如AnalogIn::read()，是返回ADC的采样结果。</p>
+<p>再看mbed生态</p>
+<ul>
+<li>ARM提供在线IDE，可以在线快速编译</li>
+<li>线下的开发环境也简单易用, mbed cli类似于android的repo</li>
+<li>github上的例子很多，参考性强</li>
+<li>社区相对比较活跃</li>
+<li>合作伙伴众多</li>
+</ul>
+<p>ARM搞起了云和RTOS，令人联想到之前的Linaro，看似前景不错。而且据说国内的BAT也有在使用mbed做产品，其实就把mbed Cloud换自己的云，改造下Device Connector即可。本人也正在研究mbed，之后会写些使用心得。</p>
+<h1 id="RIOT"><a href="#RIOT" class="headerlink" title="RIOT"></a>RIOT</h1><p><a href="https://riot-os.org/" target="_blank" rel="external">https://riot-os.org/</a></p>
+<p>RIOT官方的口号:)</p>
+<blockquote>
+<p>if your tiny IoT device can’t run Linux, use RIOT</p>
+</blockquote>
+<p>RIOT是面向开发者的，开源的，适合物联网的操作系统。它的背后没有某个公司的支持，而完全是由社区驱动。<br>他的一些特性：</p>
+<ul>
+<li>标准的C/C++编程</li>
+<li>标准的gcc编译环境</li>
+<li>可以跑在8位，16位和32位的嵌入式系统上</li>
+<li>部分的POSIX接口兼容（以后的目标是全兼容）</li>
+<li>支持在Linux/Unix的虚拟机上运行</li>
+<li>实时性，快速的中断响应（~50 clock cycles）</li>
+<li>微内核，组件都可以动态加载，并且通过message来实现服务</li>
+<li>极小开销的多线程支持（&lt; 25 bytes per thread）</li>
+<li>丰富的网络支持：6LoWPAN，IPv6，RPL，CoAP and CBOR</li>
+<li>高精度的定时器</li>
+<li>丰富的工具 （System shell, SHA-256, Bloom filters, …）</li>
+</ul>
+<p><em>RIOT 架构框图</em><br><img src="IoT-RTOS/riot_arch.jpg" alt="riot architecture"></p>
+<p>RIOT的CPU的IP驱动基本都有一套统一接口，但是没有任何抽象层，被放在源代码的cpu\<cpu>\periph中。这意味着在做新的平台支持时，你要注意驱动的接口要和API文档里的一致，比如ADC的adc_init(), adc_read()。源代码的drivers\则放着板级的驱动，比如NXP的MMA8541，利用i2c统一接口来访问。<br>由于是微内核（microkernel）的实现，所有的系统服务包括时钟、网络协议栈、网络服务等，都是通过创建独立的线程来实现。在线程中都有event_loop来接收服务请求，处理并发送服务结果。RIOT中最关键的是GNRC（Generic network stack）网络协议栈，它实现了从MAC层一直到传输层的各种协议，如6LowPan，IPv4/v6，RPL，TCP/UDP。并且这些不同的协议栈之间通过netapi统一接口开放给用户。对于应用层来说，GNRC提供了conn和socket两种API。在安全方面，貌似802.15.4这层没有加入AES的支持，只提供tinyDTLS在应用层给用户使用。由于RIOT的POSIX的部分兼容性，及提供BSD socket的接口，很多应用都可以方便的移植过来，在pkg/你能找到例如libcoap，openwsn这样的应用。<br>RIOT最早是由柏林自由大学开发的，目前完全由社区维护，貌似欧洲开发者居多。从devel maillist里来看，感觉社区活跃程度一般。每两周都有一个Virtual meeting，都还是大学在牵头。<br>总之，一个很有想法的微内核，加上开发环境相对于之前熟悉Linux的开发者来讲很友好。应该是个潜力股。</cpu></p>
+<h1 id="Contiki"><a href="#Contiki" class="headerlink" title="Contiki"></a>Contiki</h1><p><a href="http://www.contiki-os.org/" target="_blank" rel="external">http://www.contiki-os.org/</a></p>
+<p>以下是维基百科对Contiki的介绍：</p>
+<blockquote>
+<p>Contiki is an operating system for networked, memory-constrained systems with a focus on low-power wireless Internet of Things devices. Extant uses for Contiki include systems for street lighting, sound monitoring for smart cities, radiation monitoring, and alarms</p>
+</blockquote>
+<p>可以看得出来，原来Contiki是为智能城市而诞生的。支持的平台有限，基本是内部集成CC24xx/25xx，MC1322x之类Radio的SensorTag平台，或者一个很小的MCU加上这些Radio模块的平台。从它所支持的平台也能看出，Contiki更加专注于小型传感器节点。它更关注与PAN内的节点通讯，当然他也有传统的IPv4/v6，TCP/UDP支持，使得利用CoAP可以用来和云端通讯。</p>
+<p>Contiki的特性：</p>
+<ul>
+<li>完整的网络支持，HTTP，UDP/TCP，以及低功耗协议6lowpan，RPL和CoAP。整个IPv6协议栈都是有思科贡献</li>
+<li>专门为小内存设备设计的内存管理器</li>
+<li>小巧的估算功耗的工具</li>
+<li>丰富的实例</li>
+<li>高效的支持外部Flash的Coffee flash文件系统</li>
+<li>Protothreads，事件驱动及多线程的编程模型</li>
+<li>Cooja网络模拟器</li>
+<li>Rime协议栈，比IPv6更轻量级的网络层</li>
+</ul>
+<p>Contiki也是个微内核（microkernel），所有的系统服务都是通过启线程完成，Protothreads线程整合了线程间事件通讯，使得编写系统服务非常容易。驱动程序方面，Contiki没有统一的驱动程序框架，驱动都是各家MCU自带开发包提供，这样的好处是能够保证生成的二进制代码够小。<br>Contiki有个很有特色的模拟器，Cooja Network Simulator，可以运行很多例子，并且可以监控整个网络的包及节点状态。这样可以让用户在没有充足硬件设备的条件下做开发。<br>Contiki社区基本依靠maillist讨论问题，github做pull request。从maillist archive里看，社区活跃程度很一般。</p>
+<h1 id="Zephyr"><a href="#Zephyr" class="headerlink" title="Zephyr"></a>Zephyr</h1><p><a href="http://www.zephyrproject.org/" target="_blank" rel="external">http://www.zephyrproject.org/</a></p>
+<p>Zephyr居然是Linux基金会的合作项目。应该是由INTEL将WindRiver的商用操作系统WindRiver Rocket部分开源后诞生的项目（今年才诞生）。目前可用资料不多，而且支持的硬件平台较少，ARM的平台就没几个。<br>Zephyr像极了Linux，它的源代码目录结构Kconfig使用方式，启动流程，Driver Model都可以看出来。用户的应用程序是启动后创建的最后一个线程，用户的main()会在所有的驱动，组件及硬件板子初始化后被调用，驱动使用DEVICE_INIT()，组件使用SYS_INIT()初始化，并带有优先等级。驱动都会遵循统一的驱动结构：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">struct</span> device &#123;</div><div class="line">        <span class="keyword">struct</span> device_config *config;</div><div class="line">        <span class="keyword">const</span> <span class="keyword">void</span> *driver_api;</div><div class="line">        <span class="keyword">void</span> *driver_data;</div><div class="line">&#125;;</div></pre></td></tr></table></figure></p>
+<p>所以驱动要自己定义一个配置结构，一套API的函数指针，以及驱动状态结构。和Linux很像。<br>网络支持很奇葩，协议栈居然都是用的Contiki的，Bluetooth还算比较全。子系统方面，文件系统、USB都是很简单，很原始的支持。安全方面，mbedTLS和tinyDTLS被拿了过来。<br>总体来讲，Zephyr还处于初期，很多东西都不完善。Owner又是Intel，希望别重蹈Moblin的覆辙。</p>
+<h1 id="Nuttx"><a href="#Nuttx" class="headerlink" title="Nuttx"></a>Nuttx</h1><p><a href="http://www.nuttx.org/" target="_blank" rel="external">http://www.nuttx.org/</a></p>
+<p>Nuttx,实时操作系统，POSIX接口支持，Loadable内核模块支持，BSD socket，MMU支持，等等。我只能说，长的太像Linux了。Build也是Kconfig，目录结构也基本和Linux Kernel一样。</p>
+<ul>
+<li>ARM的核基本都支持</li>
+<li>文件系统也是VFS支撑，大而全。网络的，NAND MTD的，pseudo都支持</li>
+<li>自己的Clib,也可以支持uCLib</li>
+<li>全面的网络协议栈，但是没有wireless！</li>
+<li>有自己的USB协议栈</li>
+</ul>
+<p>我一开始没打算谈Nuttx，他的无线支持很差，就更别谈无线互联了。但是BAT居然有人用它做云OS。估计是团队实在太熟悉Linux了，跑不了Linux也要找个类似的开发环境。有了BAT的支持，Nuttx估计可以发达了。</p>
+<h1 id="大比拼"><a href="#大比拼" class="headerlink" title="大比拼"></a>大比拼</h1><p>这里用一张比较简单的表来对比这些操作系统和生态</p>
+<table>
+<thead>
+<tr>
+<th>OS</th>
+<th>Brillo</th>
+<th>mbedOS</th>
+<th>RIOT</th>
+<th>Contiki</th>
+<th>Zephyr</th>
+<th>Nuttx</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Realtime</strong></td>
+<td>No</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><strong>Footprint (RAM/ROM)</strong> *</td>
+<td>35M RAM</td>
+<td>32K/256K</td>
+<td>~1.5K/~5K</td>
+<td>&lt; 10K/30K</td>
+<td>8K RAM</td>
+<td>16K/32K</td>
+</tr>
+<tr>
+<td><strong>Dev Language</strong></td>
+<td>C</td>
+<td>C/C++</td>
+<td>C/C++</td>
+<td>C</td>
+<td>C</td>
+<td>C/C++</td>
+</tr>
+<tr>
+<td><strong>MCU w/o MMU</strong></td>
+<td>No</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><strong>CPU core</strong></td>
+<td>Cortex-A</td>
+<td>Cortex-M</td>
+<td>Cortex-M, ARM7, x86</td>
+<td>Cortex-M, x86</td>
+<td>Cortex-M, x86</td>
+<td>Cortex-A/M/R, x86, MIPS</td>
+</tr>
+<tr>
+<td><strong>Networking</strong></td>
+<td>Weave, 802.15.4 (Zigbee, Thread), BLE, WiFi, Ethernet</td>
+<td>CoAP, BLE, 6LowPAN, Thread, WiFi, Ethernet, Cellular</td>
+<td>CoAP, BLE, 6LowPAN, RPL, Ethernet</td>
+<td>CoAP, 6LowPAN, RPL, Ethernet</td>
+<td>CoAP, BT4.0, BLE,  6LowPAN, Ethernet</td>
+<td>Ethernet</td>
+</tr>
+<tr>
+<td><strong>Cloud Service</strong></td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr>
+<td><strong>Build System</strong></td>
+<td>repo/gcc</td>
+<td>mbed/gcc (armcc)</td>
+<td>gcc</td>
+<td>gcc</td>
+<td>kconfig/gcc</td>
+<td>kconfig/gcc</td>
+</tr>
+<tr>
+<td><strong>License</strong></td>
+<td>Apache 2.0</td>
+<td>Apache 2.0</td>
+<td>LGPLv2</td>
+<td>3-clause BSD</td>
+<td>Apache 2.0</td>
+<td>BSD</td>
+</tr>
+<tr>
+<td><strong>Repository</strong></td>
+<td>N/A</td>
+<td>github</td>
+<td>github</td>
+<td>github</td>
+<td>N/A</td>
+<td>bitbucket</td>
+</tr>
+</tbody>
+</table>
+<p><em>对于Footprint来说，基本都是各自网站上的宣称值。除了Brillo以外，其他都是RTOS有很小的内核。程序所占的内存和代码大小取决你需要的硬件平台的驱动多少，需要什么样的协议栈等等的功能。</em></p>
+<p>对于我个人来讲，我更愿意去研究、使用Google, ARM这些牛X公司推动的产品。他们有钱、牛X，能建立庞大的生态圈，整合更多的资源。而且社区相对活跃，有啥问题也容易解决。</p>
+<h1 id="结尾"><a href="#结尾" class="headerlink" title="结尾"></a>结尾</h1><p>最近行业趋势有所变化，除了互联网依然火热外，大家的焦点无疑都从手机投向了汽车、工业、物联网。大家都希望能够使用物联网和互联网将传统行业中的产品实现互联互通，实现信息共享、提高生活、生产效率和质量。我们所工作在的半导体行业中，除了给市场提供更符合需求的处理器以外，我们还需要提供基于自己处理器的软硬件解决方案。操作系统作为应用的基础、基石，显得非常的重要。本文只是粗劣的介绍和对比了这些物联网的操作系统，希望能对读者有所帮助。任何意见建议都欢迎联系我。</p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2016/11/12/IoT-RTOS/" class="archive-article-date">
+  	<time datetime="2016-11-12T05:12:34.947Z" itemprop="datePublished"><i class="icon-clock"></i>2016-11-12</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Embeded/">Embeded</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/IoT/">IoT</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/RTOS/">RTOS</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+    	<div class="footer-left">
+    		&copy; 2016 豆芽
+    	</div>
+      	<div class="footer-right">
+      		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
+      	</div>
+    </div>
+  </div>
+</footer>
+    </div>
+    <script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: false,
+		animate: true,
+		isHome: true,
+		isPost: false,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false,
+		root: "/",
+		innerArchive: true
+	}
+</script>
+
+<script src="/./main.js"></script>
+
+
+    
+<div class="tools-col">
+  <ul class="btn-wrap">
+    
+      <li class="chose" data-hook="tools-section-all"><span class="text">全部</span><i class="icon-book"></i></li>
+    
+    
+      <li data-hook="tools-section-tag"><span class="text">标签</span><i class="icon-price-tags"></i></li>
+    
+    
+    
+      <li data-hook="tools-section-me"><span class="text">我</span><i class="icon-smile"></i></li>
+    
+  </ul>
+  <div class="tools-wrap">
+    
+    	<section class="tools-section tools-section-all chose">
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-tag">
+    			<div class="widget tagcloud" id="js-tagcloud">
+    				<a href="/tags/Embeded/" style="font-size: 10px;">Embeded</a> <a href="/tags/IoT/" style="font-size: 10px;">IoT</a> <a href="/tags/RTOS/" style="font-size: 10px;">RTOS</a>
+    			</div>
+    	</section>
+    
+
+    
+
+    
+    	<section class="tools-section tools-section-me">
+  	  	
+  	  		<div class="aboutme-wrap" id="js-aboutme">土狗一只&lt;br&gt;&lt;br&gt;码农&lt;br&gt;嵌入式</div>
+  	  	
+    	</section>
+    
+  </div>
+  
+</div>
+    <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+  </div>
+</body>
+</html>
