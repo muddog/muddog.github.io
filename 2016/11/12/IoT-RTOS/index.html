@@ -19,7 +19,7 @@
 <meta property="og:image" content="http://muddog.github.io/IoT-RTOS/brillo_arch.jpg">
 <meta property="og:image" content="http://muddog.github.io/IoT-RTOS/mbed_client.jpg">
 <meta property="og:image" content="http://muddog.github.io/IoT-RTOS/riot_arch.jpg">
-<meta property="og:updated_time" content="2016-11-12T13:35:34.906Z">
+<meta property="og:updated_time" content="2016-11-12T14:00:02.397Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="IoT的那些操作系统">
 <meta name="twitter:description" content="引子IoT(Internet of Things)一直是个市场没爆发，但炒作够火的概念。 最近看了Brillo（Goolge放出的OS for IoT），再结合手头做的项目，来聊聊打着IoT旗号的那些操作系统及其生态。可以让大家在对此类嵌入式系统软件平台选型时少些困惑。
@@ -192,7 +192,7 @@ Cloud &lt;-&gt; Board router &lt;-&gt; Nodes (things connected)
 <p>Brillo: Google’s OS for IoT MPU devices<br>• Targeted at smart homes<br>• Expanding to buildings and industry<br>• Supports MPU devices w/ min 35MB of RAM</p>
 </blockquote>
 <p>Brillo需要跑在带MMU的AP上。其实很显然，Brillo基于Android，它再怎么裁剪，也是需要跑在Linux，Kernel上还要打一堆patch。只是它把Android上关于图形、JAVA虚拟机及Framework统统裁减掉。只保留了C/C++运行环境，Binder IPC，SSL等网络安全必须组件。这也就意味着在Brillo上开发APP其实是Native的，而且驱动程序都由Android的那套HAL来做抽象，所以应用程序是直接和HAL、Lib来打交道。</p>
-<p><em>Brillo 架构框图</em><br><img src="IoT-RTOS/brillo_arch.jpg" alt="brillo architecture"></p>
+<p><em>Brillo 架构框图</em><br><img src="/IoT-RTOS/brillo_arch.jpg" alt="brillo architecture"></p>
 <p>看似Google放了个IoT的操作系统出来，实际Google目前专注于应用场景中功能相对强大的节点，或者边界节点Border Router这样的角色。最重要的是Google利用Weave打通了设备节点到Google云端的通道。Google实际上是用了最小的代价，实现了移动设备平台Android、物联网节点和自己的云端的互联互通。至于那些跑不了Brillo的节点怎么互联互通，Google交给其他人去考虑了，反正Brillo也支持6LowPan, Thread之类的协议。如果你写过Android HAL/Service，那么开发Brillo App易如反掌，直接调用Device HAL去操作设备；调用Weave API去做通讯。</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> ret = hw_get_module(LIGHTS_HARDWARE_MODULE_ID, &amp;<span class="keyword">module</span>);</div><div class="line"><span class="keyword">if</span> (ret || !<span class="keyword">module</span>)</div><div class="line">    err(<span class="number">1</span>, <span class="string">"Failed to load %s"</span>, LIGHTS_HARDWARE_MODULE_ID);</div><div class="line">ret = <span class="keyword">module</span>-&gt;methods-&gt;open(<span class="keyword">module</span>,    </div><div class="line">                            LIGHT_ID_NOTIFICATIONS,</div><div class="line">                            <span class="keyword">reinterpret_cast</span>&lt;<span class="keyword">struct</span> <span class="keyword">hw_device_t</span>**&gt;(&amp;light_device));</div><div class="line"><span class="keyword">if</span> (ret || !light_device)</div><div class="line">    err(<span class="number">1</span>, <span class="string">"Failed to open %s"</span>, LIGHT_ID_NOTIFICATIONS);</div></pre></td></tr></table></figure>
 <p>以上代码调用HAL统一接口打开一个LIGHT设备，是不是很熟悉？然后起个Daemon,利用Weave API来接收从网络上来的XMPP请求，对设备进行配置或者状态监测。在云端和移动端，可以使用网页版的Weave Developers Console和Weave App来控制监测设备。<br>Brillo可以在资源较少的MPU上跑，35MB内存就行，老的ARM9估计也可以。它可建立很多低成本的设备节点，用来和智能设备、云端通讯，或者作为PAN内设备对外的桥梁Border router。Brillo可玩性应该很高，家里的PC机，路由器都可以拿来跑，生态系统强大。但致命缺点是，我们在天朝啊，你懂得。相信国内的BAT之类，会考虑移植，改造，变异。就如对Android一般。</p>
@@ -213,7 +213,7 @@ Cloud &lt;-&gt; Board router &lt;-&gt; Nodes (things connected)
 <p>a library that connects devices to mbed Device Connector Service</p>
 </blockquote>
 <p>看似比较奇怪，其实就是一套可以移植到各种操作系统上的，能够和mbed Device Connector Service通讯的，跑在硬件设备上的软件库。它使用基于UDP的CoAP协议来通讯，使用mbedTLS来实现安全连接，兼容LWM2M。</p>
-<p><em>mbed Client 架构框图</em><br><img src="IoT-RTOS/mbed_client.jpg" alt="mbed_client"></p>
+<p><em>mbed Client 架构框图</em><br><img src="/IoT-RTOS/mbed_client.jpg" alt="mbed_client"></p>
 <p>说到这里，我们的主角mbedOS该登场了。ARM为了在基于ARM Cortex-M内核的硬件平台上实现对设备的操作，及通过Device Connector访问云端，它必须有一套可以支持mbed Client的软件解决方案。mbedOS既是基于RTOS内核，并提供各种ARM SoC硬件平台驱动和BSP的操作系统，在此之上，实现整个mbed Client库。在PAN的物联区域内，设备与设备的通讯都可以使用mbedOS提供的方案来解决，它支持NFC，RFID，BLE，6LowPAN甚至是Thread。在设备与云端的通讯上，mbedOS既支持以太网，WiFi，也支持3G。跑mbedOS的设备既可以是设备节点，也可以是边界路由器（比如6LowPAN转IPv6），也可以和智能设备通过BLE通讯。mbed Device Connector又可以使用CoAP协议在设备端和云端通讯。</p>
 <p>mbedOS对于网络的支持可谓很强大</p>
 <ul>
@@ -258,7 +258,7 @@ Cloud &lt;-&gt; Board router &lt;-&gt; Nodes (things connected)
 <li>高精度的定时器</li>
 <li>丰富的工具 （System shell, SHA-256, Bloom filters, …）</li>
 </ul>
-<p><em>RIOT 架构框图</em><br><img src="IoT-RTOS/riot_arch.jpg" alt="riot architecture"></p>
+<p><em>RIOT 架构框图</em><br><img src="/IoT-RTOS/riot_arch.jpg" alt="riot architecture"></p>
 <p>RIOT的CPU的IP驱动基本都有一套统一接口，但是没有任何抽象层，被放在源代码的cpu\<cpu>\periph中。这意味着在做新的平台支持时，你要注意驱动的接口要和API文档里的一致，比如ADC的adc_init(), adc_read()。源代码的drivers\则放着板级的驱动，比如NXP的MMA8541，利用i2c统一接口来访问。<br>由于是微内核（microkernel）的实现，所有的系统服务包括时钟、网络协议栈、网络服务等，都是通过创建独立的线程来实现。在线程中都有event_loop来接收服务请求，处理并发送服务结果。RIOT中最关键的是GNRC（Generic network stack）网络协议栈，它实现了从MAC层一直到传输层的各种协议，如6LowPan，IPv4/v6，RPL，TCP/UDP。并且这些不同的协议栈之间通过netapi统一接口开放给用户。对于应用层来说，GNRC提供了conn和socket两种API。在安全方面，貌似802.15.4这层没有加入AES的支持，只提供tinyDTLS在应用层给用户使用。由于RIOT的POSIX的部分兼容性，及提供BSD socket的接口，很多应用都可以方便的移植过来，在pkg/你能找到例如libcoap，openwsn这样的应用。<br>RIOT最早是由柏林自由大学开发的，目前完全由社区维护，貌似欧洲开发者居多。从devel maillist里来看，感觉社区活跃程度一般。每两周都有一个Virtual meeting，都还是大学在牵头。<br>总之，一个很有想法的微内核，加上开发环境相对于之前熟悉Linux的开发者来讲很友好。应该是个潜力股。</cpu></p>
 <h1 id="Contiki"><a href="#Contiki" class="headerlink" title="Contiki"></a>Contiki</h1><p><a href="http://www.contiki-os.org/" target="_blank" rel="external">http://www.contiki-os.org/</a></p>
 <p>以下是维基百科对Contiki的介绍：</p>
