@@ -19,7 +19,7 @@ DTLS简介简单说，DTLS（Datagram Transport Layer Security）实现了在UDP
 <meta property="og:image" content="http://muddog.github.io/\DTLS-Analysis\dtls-flow-capture.png">
 <meta property="og:image" content="http://muddog.github.io/\DTLS-Analysis\dtls-handshake.png">
 <meta property="og:image" content="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/Chain_of_trust.svg/645px-Chain_of_trust.svg.png">
-<meta property="og:updated_time" content="2016-11-25T14:05:28.757Z">
+<meta property="og:updated_time" content="2016-12-10T14:20:08.455Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="借助mbedTLS了解DTLS握手协议">
 <meta name="twitter:description" content="引子本文将会利用mbedTLS协议栈，通过dump协议栈调试信息，抓包，代码分析等方式来对DTLS的握手协议进行介绍。
@@ -186,6 +186,7 @@ DTLS简介简单说，DTLS（Datagram Transport Layer Security）实现了在UDP
 <h2 id="如何借助mbedTLS来分析握手协议"><a href="#如何借助mbedTLS来分析握手协议" class="headerlink" title="如何借助mbedTLS来分析握手协议"></a>如何借助mbedTLS来分析握手协议</h2><p>mbedTLS（前身PolarSSL）是面向嵌入式系统，实现的一套易用的加解密算法和SSL/TLS库。mbedTLS系统开销极小，对于系统资源要求不高。mbedTLS是开源项目，并且使用Apache 2.0许可证，使得用户既可以讲mbedTLS使用在开源项目中，也可以应用于商业项目。目前使用mbedTLS的项目很多，例如Monkey HTTP Daemon，LinkSYS路由器。</p>
 <p>我们在这里简单的利用mbedTLS自带的dtls_client/dtls_server的测试程序来分析握手协议。这里要说明的是mbedTLS这个自带的DTLS 测试程序，服务器只在localhost做bind，客户端也只连接到localhost。实际上是个loopback测试。并且使用了TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384的Cipher Suite，也就是用椭圆曲线（EC）的DH算法来实现密钥（Session Key）的协商，用RSA来实现密钥协商时交换的EC类型，DH公钥等数据的签名加密。所以握手的流程和其他一些加密方式会有所差别。比如和单纯的RSA密钥交换方式比起来，会多一个<strong>“Server Key Exchange”</strong>报文。</p>
 <h3 id="下载mbedTLS"><a href="#下载mbedTLS" class="headerlink" title="下载mbedTLS"></a>下载mbedTLS</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="variable">$git</span> <span class="built_in">clone</span> https://github.com/ARMmbed/mbedtls</div></pre></td></tr></table></figure>
+<a id="more"></a>
 <h3 id="打开调试"><a href="#打开调试" class="headerlink" title="打开调试"></a>打开调试</h3><p>在program/dtls_client.c, dtls_server.c里，增大DEBUG_LEVEL，然后将my_debug里加上时间戳信息。使能协议栈的内部调试信息，方便对比客户端和服务端的流程：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">define</span> DEBUG_LEVEL 100</span></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">my_debug</span><span class="params">( <span class="keyword">void</span> *ctx, <span class="keyword">int</span> level,</span></span></div><div class="line">                      <span class="keyword">const</span> <span class="keyword">char</span> *file, <span class="keyword">int</span> line,</div><div class="line">                      <span class="keyword">const</span> <span class="keyword">char</span> *str )</div><div class="line">&#123;</div><div class="line">    <span class="keyword">struct</span> timeval tv;</div><div class="line"></div><div class="line">    ((<span class="keyword">void</span>) level);</div><div class="line"></div><div class="line">    gettimeofday(&amp;tv, <span class="literal">NULL</span>);</div><div class="line">    <span class="comment">//strftime(outstr, sizeof(outstr), "%H:%M:%S", tmp);</span></div><div class="line"></div><div class="line">    mbedtls_fprintf( (FILE *) ctx, <span class="string">"[%06ld.%ld]%s:%04d: %s"</span>, tv.tv_sec, tv.tv_usec, file, line, str );</div><div class="line">    fflush(  (FILE *) ctx  );</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
 <h3 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h3><p>在Ubuntu上可以直接编译。</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ make</div></pre></td></tr></table></figure>
@@ -256,6 +257,15 @@ DTLS简介简单说，DTLS（Datagram Transport Layer Security）实现了在UDP
 
   
 <nav id="article-nav">
+  
+    <a href="/2016/11/25/Play-With-mbedOS/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          玩转mbedOS
+        
+      </div>
+    </a>
   
   
     <a href="/2016/11/12/IoT-RTOS/" id="article-nav-older" class="article-nav-link-wrap">
@@ -370,7 +380,7 @@ DTLS简介简单说，DTLS（Datagram Transport Layer Security）实现了在UDP
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/DTLS/" style="font-size: 10px;">DTLS</a> <a href="/tags/Embeded/" style="font-size: 10px;">Embeded</a> <a href="/tags/IoT/" style="font-size: 10px;">IoT</a> <a href="/tags/RTOS/" style="font-size: 10px;">RTOS</a> <a href="/tags/handshake/" style="font-size: 10px;">handshake</a> <a href="/tags/mbedTLS/" style="font-size: 10px;">mbedTLS</a>
+    				<a href="/tags/DTLS/" style="font-size: 10px;">DTLS</a> <a href="/tags/Embeded/" style="font-size: 10px;">Embeded</a> <a href="/tags/Family/" style="font-size: 10px;">Family</a> <a href="/tags/Hangzhou/" style="font-size: 10px;">Hangzhou</a> <a href="/tags/IoT/" style="font-size: 20px;">IoT</a> <a href="/tags/Photography/" style="font-size: 10px;">Photography</a> <a href="/tags/RTOS/" style="font-size: 20px;">RTOS</a> <a href="/tags/handshake/" style="font-size: 10px;">handshake</a> <a href="/tags/mbed/" style="font-size: 10px;">mbed</a> <a href="/tags/mbedOS/" style="font-size: 10px;">mbedOS</a> <a href="/tags/mbedTLS/" style="font-size: 10px;">mbedTLS</a>
     			</div>
     	</section>
     

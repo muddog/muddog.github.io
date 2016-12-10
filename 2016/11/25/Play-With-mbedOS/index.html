@@ -6,17 +6,18 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://muddog.github.io">
-  <title>Archives: 2016/11 | MudDog</title>
+  <title>玩转mbedOS | MudDog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="Linux &amp; IoT">
-<meta property="og:type" content="website">
-<meta property="og:title" content="MudDog">
-<meta property="og:url" content="http://muddog.github.io/archives/2016/11/index.html">
+  <meta name="description" content="引子mbedOS是ARM自己打造、主打IoT的一整套软件解决方案，是一个针对ARM CortexM系列处理器的嵌入式开源生态。详细的一些介绍可以参见我的另一篇文章《IoT的那些操作系统》从日常的工作、及和其他支持部门的交流来看，mbedOS现在还处于成长和推广阶段，在国内正真使用的客户貌似还很少，国外确实有比较牛X的客户指名道姓需要NXP的硬件来支持mbedOS。本人还是比较看好mbed，毕竟亲爹">
+<meta property="og:type" content="article">
+<meta property="og:title" content="玩转mbedOS">
+<meta property="og:url" content="http://muddog.github.io/2016/11/25/Play-With-mbedOS/index.html">
 <meta property="og:site_name" content="MudDog">
-<meta property="og:description" content="Linux &amp; IoT">
+<meta property="og:description" content="引子mbedOS是ARM自己打造、主打IoT的一整套软件解决方案，是一个针对ARM CortexM系列处理器的嵌入式开源生态。详细的一些介绍可以参见我的另一篇文章《IoT的那些操作系统》从日常的工作、及和其他支持部门的交流来看，mbedOS现在还处于成长和推广阶段，在国内正真使用的客户貌似还很少，国外确实有比较牛X的客户指名道姓需要NXP的硬件来支持mbedOS。本人还是比较看好mbed，毕竟亲爹">
+<meta property="og:updated_time" content="2016-12-10T14:20:08.456Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="MudDog">
-<meta name="twitter:description" content="Linux &amp; IoT">
+<meta name="twitter:title" content="玩转mbedOS">
+<meta name="twitter:description" content="引子mbedOS是ARM自己打造、主打IoT的一整套软件解决方案，是一个针对ARM CortexM系列处理器的嵌入式开源生态。详细的一些介绍可以参见我的另一篇文章《IoT的那些操作系统》从日常的工作、及和其他支持部门的交流来看，mbedOS现在还处于成长和推广阶段，在国内正真使用的客户貌似还很少，国外确实有比较牛X的客户指名道姓需要NXP的硬件来支持mbedOS。本人还是比较看好mbed，毕竟亲爹">
   
     <link rel="alternative" href="/atom.xml" title="MudDog" type="application/atom+xml">
   
@@ -143,118 +144,118 @@
 </nav>
 
       <div class="body-wrap">
+        <article id="post-Play-With-mbedOS" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
         
   
-  
-    
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2016" class="archive-year">2016</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2016/11/25/Play-With-mbedOS/" class="archive-article-date">
-  	<time datetime="2016-11-25T12:54:39.490Z" itemprop="datePublished"><i class="icon-clock"></i>2016-11-25</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/11/25/Play-With-mbedOS/">玩转mbedOS</a>
+    <h1 class="article-title" itemprop="name">
+      玩转mbedOS
     </h1>
   
 
-        <div class="article-info info-on-right">
-          
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="引子"><a href="#引子" class="headerlink" title="引子"></a>引子</h1><p>mbedOS是ARM自己打造、主打IoT的一整套软件解决方案，是一个针对ARM CortexM系列处理器的嵌入式开源生态。详细的一些介绍可以参见我的另一篇文章<a href="http://muddog.pub/2016/11/12/IoT-RTOS/" target="_blank" rel="external">《IoT的那些操作系统》</a><br>从日常的工作、及和其他支持部门的交流来看，mbedOS现在还处于成长和推广阶段，在国内正真使用的客户貌似还很少，国外确实有比较牛X的客户指名道姓需要NXP的硬件来支持mbedOS。本人还是比较看好mbed，毕竟亲爹是ARM，而且提供BLE，802.15.4，6LowPAN，Thread，驱动框架及RTOS等等丰富的软件解决方案。所以么，不要等客户培养起来了再去研究，早起的鸟儿有虫吃。</p>
+<h1 id="搭建环境"><a href="#搭建环境" class="headerlink" title="搭建环境"></a>搭建环境</h1><p>mbedOS支持三种开发工具：</p>
+<p>1.在线IDE<br>2.mbed CLI控制台<br>3.第三方开发工具，如IAR，MDK</p>
+<p>在线IDE编译很方便快捷，但没有调试功能。第三方的IDE都是可视化的，也没啥好介绍的。这里注重会来介绍mbed-cli，并且使用该命令行工具实现，项目导入、下载、编译、测试等等。</p>
+<p>mbed CLI is the name of the ARM mbed command line tool, packaged as mbed-cli, which enables the full mbed workflow: repositories version control, maintaining dependencies, publishing code, updating from remotely hosted repositories (GitHub, GitLab and mbed.org), and invoking ARM mbed’s own build system and export functions, among other operations.</p>
+<a id="more"></a>
+<h1 id="编译系统及配置"><a href="#编译系统及配置" class="headerlink" title="编译系统及配置"></a>编译系统及配置</h1><h1 id="内核分析"><a href="#内核分析" class="headerlink" title="内核分析"></a>内核分析</h1><h1 id="创建自己的App"><a href="#创建自己的App" class="headerlink" title="创建自己的App"></a>创建自己的App</h1><h2 id="编译App"><a href="#编译App" class="headerlink" title="编译App"></a>编译App</h2><h2 id="调试App"><a href="#调试App" class="headerlink" title="调试App"></a>调试App</h2><h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2016/11/25/Play-With-mbedOS/" class="archive-article-date">
+  	<time datetime="2016-11-25T12:54:39.490Z" itemprop="datePublished"><i class="icon-clock"></i>2016-11-25</time>
+</a>
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags"></i>
 		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/IoT/">IoT</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/RTOS/">RTOS</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mbed/">mbed</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mbedOS/">mbedOS</a></li></ul>
 	</div>
 
-          
+      
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2016/11/20/DTLS-Analysis/" class="archive-article-date">
-  	<time datetime="2016-11-20T14:30:07.031Z" itemprop="datePublished"><i class="icon-clock"></i>2016-11-20</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/11/20/DTLS-Analysis/">借助mbedTLS了解DTLS握手协议</a>
-    </h1>
-  
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/DTLS/">DTLS</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/handshake/">handshake</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mbedTLS/">mbedTLS</a></li></ul>
+  
+<nav id="article-nav">
+  
+    <a href="/2016/12/10/Sunshine-Hangzhou/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          枫叶红了...你慢慢长大
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/11/20/DTLS-Analysis/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">借助mbedTLS了解DTLS握手协议</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+
+
+<div class="share_jia">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">Share to: &nbsp; </span>
+		<a class="jiathis_button_facebook"></a> 
+	    <a class="jiathis_button_twitter"></a>
+	    <a class="jiathis_button_plus"></a> 
+	    <a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
 	</div>
+	<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
 
-          
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2016/11/12/IoT-RTOS/" class="archive-article-date">
-  	<time datetime="2016-11-12T05:12:34.947Z" itemprop="datePublished"><i class="icon-clock"></i>2016-11-12</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/11/12/IoT-RTOS/">IoT的那些操作系统</a>
-    </h1>
-  
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Embeded/">Embeded</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/IoT/">IoT</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/RTOS/">RTOS</a></li></ul>
-	</div>
 
-          
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
-  
 
-    
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="Play-With-mbedOS" data-title="玩转mbedOS" data-url="http://muddog.github.io/2016/11/25/Play-With-mbedOS/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"muddog"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
+
+
+
 
 
       </div>
@@ -277,8 +278,8 @@
 		mathjax: false,
 		animate: true,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,

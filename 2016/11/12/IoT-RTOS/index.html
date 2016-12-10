@@ -19,7 +19,7 @@
 <meta property="og:image" content="http://muddog.github.io/IoT-RTOS/brillo_arch.jpg">
 <meta property="og:image" content="http://muddog.github.io/IoT-RTOS/mbed_client.jpg">
 <meta property="og:image" content="http://muddog.github.io/IoT-RTOS/riot_arch.jpg">
-<meta property="og:updated_time" content="2016-11-25T14:05:28.756Z">
+<meta property="og:updated_time" content="2016-12-10T14:20:08.457Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="IoT的那些操作系统">
 <meta name="twitter:description" content="引子IoT(Internet of Things)一直是个市场没爆发，但炒作够火的概念。 最近看了Brillo（Goolge放出的OS for IoT），再结合手头做的项目，来聊聊打着IoT旗号的那些操作系统及其生态。可以让大家在对此类嵌入式系统软件平台选型时少些困惑。
@@ -192,6 +192,7 @@ Cloud &lt;-&gt; Board router &lt;-&gt; Nodes (things connected)
 <p>Brillo: Google’s OS for IoT MPU devices<br>• Targeted at smart homes<br>• Expanding to buildings and industry<br>• Supports MPU devices w/ min 35MB of RAM</p>
 </blockquote>
 <p>Brillo需要跑在带MMU的AP上。其实很显然，Brillo基于Android，它再怎么裁剪，也是需要跑在Linux，Kernel上还要打一堆patch。只是它把Android上关于图形、JAVA虚拟机及Framework统统裁减掉。只保留了C/C++运行环境，Binder IPC，SSL等网络安全必须组件。这也就意味着在Brillo上开发APP其实是Native的，而且驱动程序都由Android的那套HAL来做抽象，所以应用程序是直接和HAL、Lib来打交道。</p>
+<a id="more"></a>
 <p><em>Brillo 架构框图</em><br><img src="IoT-RTOS/brillo_arch.jpg" alt="brillo architecture"></p>
 <p>看似Google放了个IoT的操作系统出来，实际Google目前专注于应用场景中功能相对强大的节点，或者边界节点Border Router这样的角色。最重要的是Google利用Weave打通了设备节点到Google云端的通道。Google实际上是用了最小的代价，实现了移动设备平台Android、物联网节点和自己的云端的互联互通。至于那些跑不了Brillo的节点怎么互联互通，Google交给其他人去考虑了，反正Brillo也支持6LowPan, Thread之类的协议。如果你写过Android HAL/Service，那么开发Brillo App易如反掌，直接调用Device HAL去操作设备；调用Weave API去做通讯。</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> ret = hw_get_module(LIGHTS_HARDWARE_MODULE_ID, &amp;<span class="keyword">module</span>);</div><div class="line"><span class="keyword">if</span> (ret || !<span class="keyword">module</span>)</div><div class="line">    err(<span class="number">1</span>, <span class="string">"Failed to load %s"</span>, LIGHTS_HARDWARE_MODULE_ID);</div><div class="line">ret = <span class="keyword">module</span>-&gt;methods-&gt;open(<span class="keyword">module</span>,    </div><div class="line">                            LIGHT_ID_NOTIFICATIONS,</div><div class="line">                            <span class="keyword">reinterpret_cast</span>&lt;<span class="keyword">struct</span> <span class="keyword">hw_device_t</span>**&gt;(&amp;light_device));</div><div class="line"><span class="keyword">if</span> (ret || !light_device)</div><div class="line">    err(<span class="number">1</span>, <span class="string">"Failed to open %s"</span>, LIGHT_ID_NOTIFICATIONS);</div></pre></td></tr></table></figure>
@@ -541,7 +542,7 @@ Cloud &lt;-&gt; Board router &lt;-&gt; Nodes (things connected)
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/DTLS/" style="font-size: 10px;">DTLS</a> <a href="/tags/Embeded/" style="font-size: 10px;">Embeded</a> <a href="/tags/IoT/" style="font-size: 10px;">IoT</a> <a href="/tags/RTOS/" style="font-size: 10px;">RTOS</a> <a href="/tags/handshake/" style="font-size: 10px;">handshake</a> <a href="/tags/mbedTLS/" style="font-size: 10px;">mbedTLS</a>
+    				<a href="/tags/DTLS/" style="font-size: 10px;">DTLS</a> <a href="/tags/Embeded/" style="font-size: 10px;">Embeded</a> <a href="/tags/Family/" style="font-size: 10px;">Family</a> <a href="/tags/Hangzhou/" style="font-size: 10px;">Hangzhou</a> <a href="/tags/IoT/" style="font-size: 20px;">IoT</a> <a href="/tags/Photography/" style="font-size: 10px;">Photography</a> <a href="/tags/RTOS/" style="font-size: 20px;">RTOS</a> <a href="/tags/handshake/" style="font-size: 10px;">handshake</a> <a href="/tags/mbed/" style="font-size: 10px;">mbed</a> <a href="/tags/mbedOS/" style="font-size: 10px;">mbedOS</a> <a href="/tags/mbedTLS/" style="font-size: 10px;">mbedTLS</a>
     			</div>
     	</section>
     
