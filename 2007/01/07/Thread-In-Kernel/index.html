@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" >
+  <link rel="dns-prefetch" href="http://muddog.github.io">
+  <title>Thread supported in Kernel | MudDog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="最近QA报来的一个bug，引发了我对2.6.x linux线程实现的兴趣。以前一直以为pthread只是简单的利用clone() syscall来实现，2.4和2.6的kernel在这方面应该没有什么大改进。可稍微研究一下，才发现自己错了。Linux 2.6.x kernel 加入了对POSIX标准线程的支持。而在应用层，有LinuxThread和NPTL两个不同的库，不过接口都一样，库名也都是p">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Thread supported in Kernel">
+<meta property="og:url" content="http://muddog.github.io/2007/01/07/Thread-In-Kernel/index.html">
+<meta property="og:site_name" content="MudDog">
+<meta property="og:description" content="最近QA报来的一个bug，引发了我对2.6.x linux线程实现的兴趣。以前一直以为pthread只是简单的利用clone() syscall来实现，2.4和2.6的kernel在这方面应该没有什么大改进。可稍微研究一下，才发现自己错了。Linux 2.6.x kernel 加入了对POSIX标准线程的支持。而在应用层，有LinuxThread和NPTL两个不同的库，不过接口都一样，库名也都是p">
+<meta property="og:updated_time" content="2016-12-16T13:43:53.284Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Thread supported in Kernel">
+<meta name="twitter:description" content="最近QA报来的一个bug，引发了我对2.6.x linux线程实现的兴趣。以前一直以为pthread只是简单的利用clone() syscall来实现，2.4和2.6的kernel在这方面应该没有什么大改进。可稍微研究一下，才发现自己错了。Linux 2.6.x kernel 加入了对POSIX标准线程的支持。而在应用层，有LinuxThread和NPTL两个不同的库，不过接口都一样，库名也都是p">
+  
+    <link rel="alternative" href="/atom.xml" title="MudDog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link rel="stylesheet" href="/main.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div class="left-col">
+      <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			<img src="/avatar.png" class="js-avatar">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">豆芽</a></h1>
+		</hgroup>
+
+		
+
+		<nav class="header-menu">
+			<ul>
+			
+				<li><a href="/">Home</a></li>
+	        
+				<li><a href="/tags/IoT">IoT</a></li>
+	        
+				<li><a href="/tags/embeded">Embeded</a></li>
+	        
+				<li><a href="/tags/photo">Photograph</a></li>
+	        
+			</ul>
+		</nav>
+		<nav class="header-smart-menu">
+	        
+    		
+    			
+    			<a class="js-smart-menu" data-idx="0" href="javascript:void(0)">所有文章</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="1" href="javascript:void(0)">标签</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="2" href="javascript:void(0)">关于我</a>
+    			
+    			
+            
+		</nav>
+		<nav class="header-nav">
+			<div class="social">
+				
+					<a class="github" target="_blank" href="https://github.com/muddog" title="github">github</a>
+		        
+					<a class="weibo" target="_blank" href="http://weibo.com/muddogxp/" title="weibo">weibo</a>
+		        
+					<a class="zhihu" target="_blank" href="https://www.zhihu.com/people/muddog" title="zhihu">zhihu</a>
+		        
+					<a class="linkedin" target="_blank" href="http://www.linkedin.com/in/xinyu-chen-eric" title="linkedin">linkedin</a>
+		        
+			</div>
+		</nav>
+	</header>		
+</div>
+
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"><i class="icon-list"></i></div>
+  		<h1 class="header-author js-mobile-header hide">豆芽</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				
+					<img src="/avatar.png" class="js-avatar">
+				
+			</div>
+			<hgroup>
+			  <h1 class="header-author">豆芽</h1>
+			</hgroup>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">Home</a></li>
+		        
+					<li><a href="/tags/IoT">IoT</a></li>
+		        
+					<li><a href="/tags/embeded">Embeded</a></li>
+		        
+					<li><a href="/tags/photo">Photograph</a></li>
+		        
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+						<a class="github" target="_blank" href="https://github.com/muddog" title="github">github</a>
+			        
+						<a class="weibo" target="_blank" href="http://weibo.com/muddogxp/" title="weibo">weibo</a>
+			        
+						<a class="zhihu" target="_blank" href="https://www.zhihu.com/people/muddog" title="zhihu">zhihu</a>
+			        
+						<a class="linkedin" target="_blank" href="http://www.linkedin.com/in/xinyu-chen-eric" title="linkedin">linkedin</a>
+			        
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+
+      <div class="body-wrap">
+        <article id="post-Thread-In-Kernel" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Thread supported in Kernel
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>最近QA报来的一个bug，引发了我对2.6.x linux线程实现的兴趣。以前一直以为pthread只是简单的利用clone() syscall来实现，2.4和2.6的kernel在这方面应该没有什么大改进。可稍微研究一下，才发现自己错了。<br>Linux 2.6.x kernel 加入了对POSIX标准线程的支持。而在应用层，有LinuxThread和NPTL两个不同的库，不过接口都一样，库名也都是pthread。LinuxThread是比较早的pthread实现，在glibc 2.2.x里都有集成；而NPTL(Native POSIX Thread Library)则是Linux 线程的一个新实现，它克服了 LinuxThreads的缺点，同时也符合 POSIX 的需求。与 LinuxThreads 相比，它在性能和稳定性方面都提供了重大的改进，一般都被包含在glibc 2.3.x里。以下是NPTL相对于LinuxThread实现的优点：</p>
+<ol>
+<li>NPTL没有使用管理线程。管理线程的一些需求，例如向作为进程一部分的所有线程发送终止信号，是并不需要的；因为内核本身就可以实现这些功能。内核还会处理每个<br>线程堆栈所使用的内存的回收工作。它甚至还通过在清除父线程之前进行等待，从而实现对所有线程结束的管理，这样可以避免僵尸进程的问题。<a id="more"></a></li>
+<li>由于 NPTL 没有使用管理线程，因此其线程模型在 NUMA 和 SMP 系统上具有更好的可伸缩性和同步机制。</li>
+<li>使用 NPTL 线程库与新内核实现，就可以避免使用信号来对线程进行同步了。为了这个目的，NPTL 引入了一种名为 futex 的新机制。futex 在共享内存区域上进行工作，因此可以在进程之间进行共享，这样就可以提供进程间 POSIX 同步机制。我们也可以在进程之间共享一个 futex。这种行为使得进程间同步成为可能。实际上，NPTL 包含了一个 PTHREAD_PROCESS_SHARED 宏，使得开发人员可以让用户级进程在不同进程的线程之间共享互斥锁。</li>
+<li>由于 NPTL 是 POSIX 兼容的，因此它对信号的处理是按照每进程的原则进行的；getpid() 会为所有的线程返回相同的进程 ID。例如，如果发送了 SIGSTOP 信号，那么整个进程都会停止；使用 LinuxThreads，只有接收到这个信号的线程才会停止。这样可以在基于 NPTL 的应用程序上更好地利用调试器，例如 GDB。</li>
+<li>由于在 NPTL 中所有线程都具有一个父进程，因此对父进程汇报的资源使用情况（例如 CPU 和内存百分比）都是对整个进程进行统计的，而不是对一个线程进行统计的。</li>
+<li>NPTL 线程库所引入的一个实现特性是对 ABI（应用程序二进制接口）的支持。</li>
+</ol>
+<p>综观这些优点，其实大多都是依赖于新的内核对thread support。下面就这些特性，对kernel thread support方面一一阐述：</p>
+<h2 id="Thread-Group"><a href="#Thread-Group" class="headerlink" title="Thread Group"></a>Thread Group</h2><p>2.6.x kernel 里在进程管理上，使用了3个组的概念，它们分别是：组，线程组和会话组。普通的组，和传统的UNIX进程组概念一样：Modern Unix operating systems introduce the notion of process groups to represent a “job” abstraction。线程组则是新引入，支持POSIX标准的概念。会话组则和登陆终端有关。这些组关系紧密，并且会频繁的被kernel遍历查询，因此kernel引入一个hash表来连接这些组成员，以便快速的找到某个进程所属组的其他进程。一下是4个hash表的类型描述，不出意料，除了以上提到的3个组类型外，单个进程的pid也被加入到一个hash中。</p>
+<p><strong>Table 3-5. The four hash tables and corresponding fields in the process descriptor</strong></p>
+<table>
+<thead>
+<tr>
+<th>Hash table type</th>
+<th>Field name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PIDTYPE_PID</td>
+<td>pid</td>
+<td>PID of the process</td>
+</tr>
+<tr>
+<td>PIDTYPE_TGID</td>
+<td>tgid</td>
+<td>PID of thread group leader process</td>
+</tr>
+<tr>
+<td>PIDTYPE_PGID</td>
+<td>pgrp</td>
+<td>PID of the group leader process</td>
+</tr>
+<tr>
+<td>PIDTYPE_SID</td>
+<td>session</td>
+<td>PID of the session leader process</td>
+</tr>
+</tbody>
+</table>
+<p>为支持该hash的使用，每个进程上下文结构task_struct中就加入了pid结构数组 struct pid pids[4]，大小为4，正好是四种类型。pid结构如下：</p>
+<p><strong>Table 3-6. The fields of the pid data structures </strong></p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>int</td>
+<td>nr</td>
+<td>The PID number</td>
+</tr>
+<tr>
+<td>struct hlist_node</td>
+<td>pid_chain</td>
+<td>The links to the next and previous elements in the hash chain list</td>
+</tr>
+<tr>
+<td>struct list_head</td>
+<td>pid_list</td>
+<td>The head of the per-PID list</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>nr：进程id，但在TGID类型下，为thread group id</li>
+<li>pid_chain：hash冲突项列表，就是同一hash值下不同元素链表</li>
+<li>pid_list：连接同组内的进程</li>
+</ul>
+<p>由此，kernel其实已经有thread的概念了。在POSIX标准中，同线程组中的所有线程必须对有效信号进行处理，kernel就可以通过tgid（thread group id）可以找到所有的相关线程，在SIGKILL/SIGSTOP之类的信号发送到每个线程，而无需应用层去一一处理。关于信号会在下面详细介绍。</p>
+<p>kernel要遍历某个线程所在线程组中的其他线程，调用next_thread：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">define</span> pid_task(elem, type) \</span></div><div class="line">		list_entry(elem, struct task_struct, pids[type].pid_list)</div><div class="line"></div><div class="line"><span class="keyword">task_t</span> <span class="function">fastcall *<span class="title">next_thread</span><span class="params">(<span class="keyword">const</span> <span class="keyword">task_t</span> *p)</span></span></div><div class="line">&#123;</div><div class="line">	<span class="keyword">return</span> pid_task(p-&gt;pids[PIDTYPE_TGID].pid_list.next, PIDTYPE_TGID);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>通过pid获得task_struct结构：find_task_by_pid()<br><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">define</span> find_task_by_pid(nr) find_task_by_pid_type(PIDTYPE_PID, nr)</span></div><div class="line"></div><div class="line"><span class="keyword">task_t</span> *find_task_by_pid_type(<span class="keyword">int</span> type, <span class="keyword">int</span> nr)</div><div class="line">&#123;</div><div class="line">	<span class="keyword">struct</span> pid *pid;</div><div class="line"></div><div class="line">	pid = find_pid(type, nr); <span class="comment">/* hash 操作*/</span></div><div class="line">	<span class="keyword">if</span> (!pid)</div><div class="line">		<span class="keyword">return</span> <span class="literal">NULL</span>;</div><div class="line"></div><div class="line">	<span class="keyword">return</span> pid_task(&amp;pid-&gt;pid_list, type);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h2 id="Futex"><a href="#Futex" class="headerlink" title="Futex"></a>Futex</h2><p>Futex在共享内存区域上进行工作，因此可以在进程之间进行共享，这样就可以提供进程间 POSIX 同步机制。Futex我还没仔细看过，貌似是对某个内存地址的临界访问。它提供wait/wake方法，通过syscall来调用。线程库可以利用futex实现semaphore和read/write lock。</p>
+<h2 id="Shared-signal"><a href="#Shared-signal" class="headerlink" title="Shared signal"></a>Shared signal</h2><p>有了thread group的概念，POSIX的标准就可以得到很好的支持。首先来看一下kill系统调用：</p>
+<p><strong>sys_kill(pid, sig)</strong></p>
+<p>pid &gt; 0 向线程组id为pid的线程组发送sig消息。<br>pid = 0 向当前gid为pid的进程组中的所有线程组发送sig消息<br>pid = -1 发送sig给所有进程，swapper＆init除外<br>pid &lt; -1 向当前gid为－pid的进程组的所有线程组发送sig消息<br>sys_kill 调用kill_something_info:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">kill_something_info</span><span class="params">(<span class="keyword">int</span> sig, <span class="keyword">struct</span> siginfo *info, <span class="keyword">int</span> pid)</span></span></div><div class="line">&#123;</div><div class="line">	<span class="keyword">if</span> (!pid) &#123;</div><div class="line">		<span class="keyword">return</span> kill_pg_info(sig, info, process_group(current));</div><div class="line">	&#125; <span class="keyword">else</span> <span class="keyword">if</span> (pid == <span class="number">-1</span>) &#123;</div><div class="line">		<span class="keyword">int</span> retval = <span class="number">0</span>, count = <span class="number">0</span>;</div><div class="line">		<span class="keyword">struct</span> task_struct * p;</div><div class="line"></div><div class="line">		read_lock(&amp;tasklist_lock);</div><div class="line">		for_each_process(p) &#123;</div><div class="line">			<span class="keyword">if</span> (p-&gt;pid &gt; <span class="number">1</span> &amp;&amp; p-&gt;tgid != current-&gt;tgid) &#123;</div><div class="line">				<span class="keyword">int</span> err = group_send_sig_info(sig, info, p);</div><div class="line">				++count;</div><div class="line">				<span class="keyword">if</span> (err != -EPERM)</div><div class="line">					retval = err;</div><div class="line">			&#125;</div><div class="line">		&#125;</div><div class="line">		read_unlock(&amp;tasklist_lock);</div><div class="line">		<span class="keyword">return</span> count ? retval : -ESRCH;</div><div class="line">	&#125; <span class="keyword">else</span> <span class="keyword">if</span> (pid &lt; <span class="number">0</span>) &#123;</div><div class="line">		<span class="keyword">return</span> kill_pg_info(sig, info, -pid);</div><div class="line">	&#125; <span class="keyword">else</span> &#123;</div><div class="line">		<span class="keyword">return</span> kill_proc_info(sig, info, pid);</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>kill_pg_info()发送消息给组内的所有线程组。 kill_proc_info则发送给pid的线程组。<br>kill_pg_info()调用：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> __kill_pg_info(<span class="keyword">int</span> sig, <span class="keyword">struct</span> siginfo *info, <span class="keyword">pid_t</span> pgrp)</div><div class="line">&#123;</div><div class="line">	<span class="keyword">struct</span> task_struct *p = <span class="literal">NULL</span>;</div><div class="line">	<span class="keyword">int</span> retval, success;</div><div class="line"></div><div class="line">	<span class="keyword">if</span> (pgrp &lt;= <span class="number">0</span>)</div><div class="line">		<span class="keyword">return</span> -EINVAL;</div><div class="line"></div><div class="line">	success = <span class="number">0</span>;</div><div class="line">	retval = -ESRCH;</div><div class="line">	do_each_task_pid(pgrp, PIDTYPE_PGID, p) &#123; <span class="comment">/* 遍历hash中进程组中的所有进程 */</span></div><div class="line">		<span class="keyword">int</span> err = group_send_sig_info(sig, info, p); <span class="comment">/* 向进程的线程组发送消息 */</span></div><div class="line">		success |= !err;</div><div class="line">		retval = err;</div><div class="line">	&#125; while_each_task_pid(pgrp, PIDTYPE_PGID, p);</div><div class="line">	<span class="keyword">return</span> success ? <span class="number">0</span> : retval;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>kill_proc_info() 最终也调用group_send_sig_info去发送消息。至于详细的消息发送，可以研究研究group_send_sig_info。</p>
+<h2 id="proc-实例"><a href="#proc-实例" class="headerlink" title="/proc 实例"></a>/proc 实例</h2><p>以往的kernel在/proc/下都会显示所有的进程id目录，现在只显示thread group id目录。当用户access /proc/目录时，一下函数被调用：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">proc_pid_readdir</span><span class="params">(<span class="keyword">struct</span> file * filp, <span class="keyword">void</span> * dirent, <span class="keyword">filldir_t</span> filldir)</span></span></div><div class="line">&#123;</div><div class="line">	<span class="keyword">unsigned</span> <span class="keyword">int</span> tgid_array[PROC_MAXPIDS];</div><div class="line">	<span class="keyword">char</span> buf[PROC_NUMBUF];</div><div class="line">	<span class="keyword">unsigned</span> <span class="keyword">int</span> nr = filp-&gt;f_pos – FIRST_PROCESS_ENTRY;</div><div class="line">	<span class="keyword">unsigned</span> <span class="keyword">int</span> nr_tgids, i;</div><div class="line">	<span class="keyword">int</span> next_tgid;</div><div class="line">	…</div><div class="line">	<span class="keyword">for</span> (;;) &#123;</div><div class="line">		nr_tgids = get_tgid_list(nr, next_tgid, tgid_array); <span class="comment">/* tgid_array 返回所有的tgid */</span></div><div class="line">		<span class="keyword">if</span> (!nr_tgids) &#123;</div><div class="line">			<span class="comment">/* no more entries ! */</span></div><div class="line">			<span class="keyword">break</span>;</div><div class="line">		&#125;</div><div class="line">		next_tgid = <span class="number">0</span>;</div><div class="line">		… <span class="comment">/* 创建tgid对应的inode节点… */</span></div><div class="line">	&#125;</div><div class="line">out:</div><div class="line">	<span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>get_tgid_list函数获得所有的tgid，原型如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">get_tgid_list</span><span class="params">(<span class="keyword">int</span> index, <span class="keyword">unsigned</span> <span class="keyword">long</span> version, <span class="keyword">unsigned</span> <span class="keyword">int</span> *tgids)</span></span></div><div class="line">&#123;</div><div class="line">	<span class="keyword">struct</span> task_struct *p;</div><div class="line">	<span class="keyword">int</span> nr_tgids = <span class="number">0</span>;</div><div class="line"></div><div class="line">	index-–;</div><div class="line">	read_lock(&amp;tasklist_lock);</div><div class="line">	p = <span class="literal">NULL</span>;</div><div class="line">	…</div><div class="line">	<span class="keyword">if</span> (p)</div><div class="line">		index = <span class="number">0</span>;</div><div class="line">	<span class="keyword">else</span></div><div class="line">		p = next_task(&amp;init_task);</div><div class="line"></div><div class="line">	<span class="keyword">for</span> ( ; p != &amp;init_task; p = next_task(p)) &#123;</div><div class="line">		<span class="keyword">int</span> tgid = p-&gt;pid;</div><div class="line">		<span class="keyword">if</span> (!pid_alive(p))</div><div class="line">			<span class="keyword">continue</span>;</div><div class="line">		<span class="keyword">if</span> (-–index &gt;= <span class="number">0</span>)</div><div class="line">			<span class="keyword">continue</span>;</div><div class="line">		tgids[nr_tgids] = tgid;</div><div class="line">		nr_tgids++;</div><div class="line">		<span class="keyword">if</span> (nr_tgids &gt;= PROC_MAXPIDS)</div><div class="line">			<span class="keyword">break</span>;</div><div class="line">	&#125;</div><div class="line">	read_unlock(&amp;tasklist_lock);</div><div class="line">	<span class="keyword">return</span> nr_tgids;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>最终调用next_task从init_task开始遍历获得所有tgid。因此在使用ps时，不加额外的参数，你可能看不到所有的线程，看到的只是线程组leader。那如何查看线程组中的所有线程？查看： /proc/TGID/task/<br>这时会调用get_tid_list为所有的线程创建inode：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">get_tid_list</span><span class="params">(<span class="keyword">int</span> index, <span class="keyword">unsigned</span> <span class="keyword">int</span> *tids, <span class="keyword">struct</span> inode *dir)</span></span></div><div class="line">&#123;</div><div class="line">	<span class="keyword">struct</span> task_struct *leader_task = proc_task(dir);</div><div class="line">	<span class="keyword">struct</span> task_struct *task = leader_task;</div><div class="line">	<span class="keyword">int</span> nr_tids = <span class="number">0</span>;</div><div class="line"></div><div class="line">	index -= <span class="number">2</span>;</div><div class="line">	read_lock(&amp;tasklist_lock);</div><div class="line">	<span class="comment">/*</span></div><div class="line">	* The starting point task (leader_task) might be an already</div><div class="line">	* unlinked task, which cannot be used to access the task-list</div><div class="line">	* via next_thread().</div><div class="line">	*/</div><div class="line">	<span class="keyword">if</span> (pid_alive(task)) <span class="keyword">do</span> &#123;</div><div class="line">		<span class="keyword">int</span> tid = task-&gt;pid;</div><div class="line"></div><div class="line">		<span class="keyword">if</span> (--index &gt;= <span class="number">0</span>)</div><div class="line">			<span class="keyword">continue</span>;</div><div class="line">		<span class="keyword">if</span> (tids != <span class="literal">NULL</span>)</div><div class="line">			tids[nr_tids] = tid;</div><div class="line">		nr_tids++;</div><div class="line">		<span class="keyword">if</span> (nr_tids &gt;= PROC_MAXPIDS)</div><div class="line">			<span class="keyword">break</span>;</div><div class="line">	&#125; <span class="keyword">while</span> ((task = next_thread(task)) != leader_task);</div><div class="line"></div><div class="line">	read_unlock(&amp;tasklist_lock);</div><div class="line">	<span class="keyword">return</span> nr_tids;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>最终调用next_thread遍历。别奇怪为什么linux老说线程是轻量级的进程，而ps看不到，线程是进程，不过是在kernel里被组织了起来。linux对线程的支持很妙，线程的创建和调度非常的高效。有了对kernel中支持线程的知识，相信平时在写pthread应用时会游刃有余。</p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2007/01/07/Thread-In-Kernel/" class="archive-article-date">
+  	<time datetime="2007-01-07T05:00:00.000Z" itemprop="datePublished"><i class="icon-clock"></i>2007-01-07</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Kernel/">Kernel</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux/">Linux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Thread/">Thread</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+  
+<nav id="article-nav">
+  
+    <a href="/2007/04/08/Kernel-Memory-Allocation/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          Kernel中的内存分配方式
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2006/03/02/Block-NonBlock-In-Kernel/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">kernel中的阻塞与非阻塞</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+
+
+<div class="share_jia">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">Share to: &nbsp; </span>
+		<a class="jiathis_button_facebook"></a> 
+	    <a class="jiathis_button_twitter"></a>
+	    <a class="jiathis_button_plus"></a> 
+	    <a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	</div>
+	<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
+
+
+
+
+
+
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="Thread-In-Kernel" data-title="Thread supported in Kernel" data-url="http://muddog.github.io/2007/01/07/Thread-In-Kernel/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"muddog"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
+
+
+
+
+
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+    	<div class="footer-left">
+    		&copy; 2016 豆芽
+    	</div>
+      	<div class="footer-right">
+      		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
+      	</div>
+    </div>
+  </div>
+</footer>
+    </div>
+    <script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: false,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false,
+		root: "/",
+		innerArchive: true
+	}
+</script>
+
+<script src="/./main.js"></script>
+
+
+    
+<div class="tools-col">
+  <ul class="btn-wrap">
+    
+      <li class="chose" data-hook="tools-section-all"><span class="text">全部</span><i class="icon-book"></i></li>
+    
+    
+      <li data-hook="tools-section-tag"><span class="text">标签</span><i class="icon-price-tags"></i></li>
+    
+    
+    
+      <li data-hook="tools-section-me"><span class="text">我</span><i class="icon-smile"></i></li>
+    
+  </ul>
+  <div class="tools-wrap">
+    
+    	<section class="tools-section tools-section-all chose">
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-tag">
+    			<div class="widget tagcloud" id="js-tagcloud">
+    				<a href="/tags/Blocking/" style="font-size: 10px;">Blocking</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/Clocksource/" style="font-size: 10px;">Clocksource</a> <a href="/tags/DTLS/" style="font-size: 10px;">DTLS</a> <a href="/tags/Embeded/" style="font-size: 10px;">Embeded</a> <a href="/tags/FTP/" style="font-size: 10px;">FTP</a> <a href="/tags/Family/" style="font-size: 10px;">Family</a> <a href="/tags/HRTimer/" style="font-size: 10px;">HRTimer</a> <a href="/tags/Hangzhou/" style="font-size: 10px;">Hangzhou</a> <a href="/tags/IoT/" style="font-size: 13.33px;">IoT</a> <a href="/tags/Kernel/" style="font-size: 16.67px;">Kernel</a> <a href="/tags/Linux/" style="font-size: 20px;">Linux</a> <a href="/tags/Memory/" style="font-size: 10px;">Memory</a> <a href="/tags/Netfilter/" style="font-size: 13.33px;">Netfilter</a> <a href="/tags/Photography/" style="font-size: 10px;">Photography</a> <a href="/tags/RTOS/" style="font-size: 13.33px;">RTOS</a> <a href="/tags/TCP/" style="font-size: 10px;">TCP</a> <a href="/tags/Thread/" style="font-size: 13.33px;">Thread</a> <a href="/tags/Timekeeping/" style="font-size: 10px;">Timekeeping</a> <a href="/tags/buddy/" style="font-size: 10px;">buddy</a> <a href="/tags/handshake/" style="font-size: 10px;">handshake</a> <a href="/tags/mbed/" style="font-size: 10px;">mbed</a> <a href="/tags/mbedOS/" style="font-size: 10px;">mbedOS</a> <a href="/tags/mbedTLS/" style="font-size: 10px;">mbedTLS</a>
+    			</div>
+    	</section>
+    
+
+    
+
+    
+    	<section class="tools-section tools-section-me">
+  	  	
+  	  		<div class="aboutme-wrap" id="js-aboutme">土狗一只&lt;br&gt;&lt;br&gt;码农&lt;br&gt;嵌入式</div>
+  	  	
+    	</section>
+    
+  </div>
+  
+</div>
+    <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+  </div>
+</body>
+</html>

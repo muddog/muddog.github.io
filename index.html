@@ -219,10 +219,20 @@
     <div class="article-entry" itemprop="articleBody">
       
         <h1 id="引子"><a href="#引子" class="headerlink" title="引子"></a>引子</h1><p>mbedOS是ARM自己打造、主打IoT的一整套软件解决方案，是一个针对ARM CortexM系列处理器的嵌入式开源生态。详细的一些介绍可以参见我的另一篇文章<a href="http://muddog.pub/2016/11/12/IoT-RTOS/">《IoT的那些操作系统》</a><br>从日常的工作、及和其他支持部门的交流来看，mbedOS现在还处于成长和推广阶段，在国内正真使用的客户貌似还很少，国外确实有比较牛X的客户指名道姓需要NXP的硬件来支持mbedOS。本人还是比较看好mbed，毕竟亲爹是ARM，而且提供BLE，802.15.4，6LowPAN，Thread，驱动框架及RTOS等等丰富的软件解决方案。所以么，不要等客户培养起来了再去研究，早起的鸟儿有虫吃。</p>
-<h1 id="搭建环境"><a href="#搭建环境" class="headerlink" title="搭建环境"></a>搭建环境</h1><p>mbedOS支持三种开发工具：</p>
-<p>1.在线IDE<br>2.mbed CLI控制台<br>3.第三方开发工具，如IAR，MDK</p>
-<p>在线IDE编译很方便快捷，但没有调试功能。第三方的IDE都是可视化的，也没啥好介绍的。这里注重会来介绍mbed-cli，并且使用该命令行工具实现，项目导入、下载、编译、测试等等。</p>
-<p>mbed CLI is the name of the ARM mbed command line tool, packaged as mbed-cli, which enables the full mbed workflow: repositories version control, maintaining dependencies, publishing code, updating from remotely hosted repositories (GitHub, GitLab and mbed.org), and invoking ARM mbed’s own build system and export functions, among other operations.</p>
+<h1 id="搭建环境"><a href="#搭建环境" class="headerlink" title="搭建环境"></a>搭建环境</h1><h2 id="开发板"><a href="#开发板" class="headerlink" title="开发板"></a>开发板</h2><p>mbedOS的例子大部分都可以直接跑在NXP的FRDM-K64之上。</p>
+<ul>
+<li>mbed官方对板子的<a href="https://developer.mbed.org/platforms/FRDM-K64F/">介绍及使用方法</a>，</li>
+<li>NXP官网对板子的<a href="http://www.nxp.com/products/software-and-tools/hardware-development-tools/freedom-development-boards/freedom-development-platform-for-kinetis-k64-k63-and-k24-mcus:FRDM-K64F?fsrch=1&amp;sr=1&amp;pageNum=1">介绍</a></li>
+</ul>
+<p>买板子，虽然mbed和NXP都可以买，但还是淘宝吧，发货快。</p>
+<h2 id="开发工具"><a href="#开发工具" class="headerlink" title="开发工具"></a>开发工具</h2><p>mbedOS支持三种开发工具：<br>1.在线IDE<br>2.mbed CLI控制台<br>3.第三方开发工具，如IAR，MDK</p>
+<p>在线IDE编译很方便快捷，但没有调试功能。第三方的IDE都是可视化的，也没啥好介绍的。这里注重会来介绍mbed-cli，官方的介绍是它的作用贯穿于整个mbed工作流：代码仓库版本控制、依赖管理、代码发布、从其他地方获取代码、调用编译系统及其他。本文会介绍如何利用mbed-cli来：项目导入、下载、编译、测试等等。<br>无论你是用Windows还是Linux的主机，先准备好安装这四个工具：</p>
+<ul>
+<li>Python - mbed CLI 是用Python写的，并且在 version 2.7.11 上做过完整测试，不兼容Python3.x.</li>
+<li><a href="https://git-scm.com/">Git</a> - version 1.9.5 or later</li>
+<li><a href="https://www.mercurial-scm.org/">Mercurial</a> - version 2.2.2 or later</li>
+<li><a href="https://launchpad.net/gcc-arm-embedded">GNU ARM</a> - ARM GCC交叉编译工具</li>
+</ul>
         <p class="article-more-link">
           <a class="article-more-a"  href="/2016/11/25/Play-With-mbedOS/#more">more >></a>
         </p>
@@ -398,6 +408,330 @@ Cloud &lt;-&gt; Board router &lt;-&gt; Nodes (things connected)
 
 
   
+    <article id="post-Android-Recovery" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2009/04/25/Android-Recovery/">Android Recovery模式</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="Recovery简介"><a href="#Recovery简介" class="headerlink" title="Recovery简介"></a>Recovery简介</h2><p>Android利用Recovery模式，进行恢复出厂设置，OTA升级，patch升级及firmware升级。升级一般通过运行升级包中的META-INF/com/google/android/update-script脚本来执行自定义升级，脚本中是一组recovery系统能识别的UI控制，文件系统操作命令，例如write_raw_image（写FLASH分区），copy_dir（复制目录）。该包一般被下载至SDCARD和CACHE分区下。如果对该包内容感兴趣，可以从<a href="http://forum.xda-developers.com/showthread.php?t=442480">http://forum.xda-developers.com/showthread.php?t=442480</a> 下载JF升级包来看看。升级中还涉及到包的数字签名，签名方式和普通JAR文件签名差不错。公钥会被硬编译入recovery，编译时生成在：out/target/product/XX/obj/PACKAGING/ota_keys_inc_intermediates/keys.inc</p>
+<h3 id="G1中的三种启动模式"><a href="#G1中的三种启动模式" class="headerlink" title="G1中的三种启动模式"></a>G1中的三种启动模式</h3><p>MAGIC KEY:</p>
+<ol>
+<li>camera + power：bootloader模式，ADP里则可以使用fastboot模式</li>
+<li>home + power：recovery模式</li>
+<li>正常启动, Bootloader正常启动，又有三种方式，按照BCB（Bootloader Control Block, 下节介绍）中的command分类：<ul>
+<li>command == ‘boot-recovery’ → 启动recovery.img。recovery模式</li>
+<li>command == ‘update-radio/hboot’ → 更新firmware（bootloader)</li>
+</ul>
+</li>
+<li>其他 → 启动boot.img</li>
+</ol>
+        <p class="article-more-link">
+          <a class="article-more-a"  href="/2009/04/25/Android-Recovery/#more">more >></a>
+        </p>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2009/04/25/Android-Recovery/" class="archive-article-date">
+  	<time datetime="2009-04-25T05:00:00.000Z" itemprop="datePublished"><i class="icon-clock"></i>2009-04-25</time>
+</a>
+      
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-Hrtimer-Clockevent-Timekeeping" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2007/11/14/Hrtimer-Clockevent-Timekeeping/">Linux Kernel Timekeeping</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>kernel-2.6.22中的arm arch加入了对dynticks, clocksource/event支持. imx31的BSP在clock这里有一些改动. 找了些kernel clock及timer子系统近来的变化, 总结一下。<br>一般来说Soft-Timer (timer wheel / hrtimer) 都是由Hardware-Timer(时钟中断之类)以及相关的clock source(e.g GPT in Soc)驱动, 所以我打算先从clock这层开始介绍, 接着是soft-timer, kernel timekeeping, 最后来看一些应用.</p>
+        <p class="article-more-link">
+          <a class="article-more-a"  href="/2007/11/14/Hrtimer-Clockevent-Timekeeping/#more">more >></a>
+        </p>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2007/11/14/Hrtimer-Clockevent-Timekeeping/" class="archive-article-date">
+  	<time datetime="2007-11-14T05:00:00.000Z" itemprop="datePublished"><i class="icon-clock"></i>2007-11-14</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Clocksource/">Clocksource</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/HRTimer/">HRTimer</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Kernel/">Kernel</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux/">Linux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Timekeeping/">Timekeeping</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-Kernel-Memory-Allocation" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2007/04/08/Kernel-Memory-Allocation/">Kernel中的内存分配方式</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>这周BSP那边碰到一个蛮严重的issue： 循环放电影，v4l2 output driver的 dma_alloc很容易就失败，kernel panic，dump出当前buddy系统的状态。<br>初步分析是由于内存fragment导致没有足够大的连续内存分配给v4l output driver。开始debug<br>首先通过/proc/buddyinfo 在播放电影时候不间断的dump buddy状态，发现大块内存块：256K － 4MB block 减少的很迅速，1－2小时后，buddy中就不存在大块连续内存。这证明了初步分析是正确的，但是还不知道是谁导致了fragment，是应用层，还是v4l2 driver本身？<br>接下来添加一个NORMAL zone（ARM体系中就DMA一个zone，所以application和dma都使用一个buddy系统），让普通内存分配和dma隔开。继续测试，发现dma zone中的内存块状态在最初很正常，但NORMAL zone的内存却在急剧减少，最终NORMAL zone已经没有足够内存给application，kernel转而向DMA zone申请，最终issue重现。</p>
+<p>现在问题很清楚了，application发生内存leak，很严重的leak。但是dma_alloc这边会没有问题马？Fred在看了我描述的问题后，指出了dma_alloc中算法的一些问题：当向buddy申请完足够size的2^的内存块后，该函数会释放在申请块中多余的page，加速了fragment。后来我们做了一个实验，将dma_alloc里的释放多余页的功能去掉，fragment的速度大大减缓。<br>经过上周对这个issue的研究，我开始重新总结kernel里对内存分配的方式和方法，总结如下：</p>
+        <p class="article-more-link">
+          <a class="article-more-a"  href="/2007/04/08/Kernel-Memory-Allocation/#more">more >></a>
+        </p>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2007/04/08/Kernel-Memory-Allocation/" class="archive-article-date">
+  	<time datetime="2007-04-08T05:00:00.000Z" itemprop="datePublished"><i class="icon-clock"></i>2007-04-08</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Cache/">Cache</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Kernel/">Kernel</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux/">Linux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Memory/">Memory</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/buddy/">buddy</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-Thread-In-Kernel" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2007/01/07/Thread-In-Kernel/">Thread supported in Kernel</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>最近QA报来的一个bug，引发了我对2.6.x linux线程实现的兴趣。以前一直以为pthread只是简单的利用clone() syscall来实现，2.4和2.6的kernel在这方面应该没有什么大改进。可稍微研究一下，才发现自己错了。<br>Linux 2.6.x kernel 加入了对POSIX标准线程的支持。而在应用层，有LinuxThread和NPTL两个不同的库，不过接口都一样，库名也都是pthread。LinuxThread是比较早的pthread实现，在glibc 2.2.x里都有集成；而NPTL(Native POSIX Thread Library)则是Linux 线程的一个新实现，它克服了 LinuxThreads的缺点，同时也符合 POSIX 的需求。与 LinuxThreads 相比，它在性能和稳定性方面都提供了重大的改进，一般都被包含在glibc 2.3.x里。以下是NPTL相对于LinuxThread实现的优点：</p>
+<ol>
+<li>NPTL没有使用管理线程。管理线程的一些需求，例如向作为进程一部分的所有线程发送终止信号，是并不需要的；因为内核本身就可以实现这些功能。内核还会处理每个<br>线程堆栈所使用的内存的回收工作。它甚至还通过在清除父线程之前进行等待，从而实现对所有线程结束的管理，这样可以避免僵尸进程的问题。
+        <p class="article-more-link">
+          <a class="article-more-a"  href="/2007/01/07/Thread-In-Kernel/#more">more >></a>
+        </p>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2007/01/07/Thread-In-Kernel/" class="archive-article-date">
+  	<time datetime="2007-01-07T05:00:00.000Z" itemprop="datePublished"><i class="icon-clock"></i>2007-01-07</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Kernel/">Kernel</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux/">Linux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Thread/">Thread</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-Block-NonBlock-In-Kernel" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2006/03/02/Block-NonBlock-In-Kernel/">kernel中的阻塞与非阻塞</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>“要效率，就用NON-BLOCK操作吧！”， 这大概是很多program，特别是玩网络的深信不移的话。那么kernel里是如何实现阻塞和非阻塞的呢？<br>kernel里一般利用filp-&gt;f_flag中的O_NONBLOCK位，或者诸如release socket时利用的sock-&gt;sk-&gt;linger标志，来判断该操作是否可以阻塞。如果可以，则将进程设置成TASK_INTERRUPTIBLE 或者 TASK_UNINTERRUPTIBLE， 加入到该操作相关的等待队列，然后探测异步操作是否结束，如果操作结束，则该进程继续执行，否则schedule，阻塞自己。当阻塞的进程由于异步事件的到来而被唤醒时，再次判断操作是否完成，如果还未完成，继续schedule，否则，进程重新执行下去。<br>这里就存在一个问题，如何在操作未完成时强制唤醒阻塞进程呢？如果进程阻塞时，进程状态设置成TASK_INTERRUPTIBLE，那么一个signal将会唤醒进程。否则只能等待操作完成。所以如果你自己再kernel里写了一些能阻塞的操作，并且希望异步的停止阻塞，那么请确保该阻塞操作是可被中断的。下面来看一个例子：<br>下面这个函数是被tcp_ipv4.c:tcp_accept()中调用的，用来等待一个连接到来。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/* 注意参数中的timeo，如果是非阻塞，值为0 */</span></div><div class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">wait_for_connect</span><span class="params">(<span class="keyword">struct</span> sock * sk, <span class="keyword">long</span> timeo)</span></span></div><div class="line">&#123;</div><div class="line">    DECLARE_WAITQUEUE(wait, current);</div><div class="line">    <span class="keyword">int</span> err;</div><div class="line"> </div><div class="line">    add_wait_queue_exclusive(sk-&gt;sleep, &amp;wait); <span class="comment">// 加入到sk-&gt;sleep的等待队列上，准备阻塞。</span></div><div class="line">    <span class="keyword">for</span> (;;) &#123;  <span class="comment">// 循环判断操作是否完成，未完成则schedule</span></div><div class="line">        current-&gt;state = TASK_INTERRUPTIBLE; <span class="comment">// 可被signal中断</span></div><div class="line">        release_sock(sk);</div><div class="line">        <span class="keyword">if</span> (sk-&gt;tp_pinfo.af_tcp.accept_queue == <span class="literal">NULL</span>) <span class="comment">// 接收队列中是否有新连接？</span></div><div class="line">            timeo = schedule_timeout(timeo); <span class="comment">// 无新连接，则执行重新调度。如果timeo==0 schedule_timeout的行为类似schedule，但是进程确被重新放入running task队列中，等待运行，所以会被快速的执行。</span></div><div class="line">        lock_sock(sk);</div><div class="line">        err = <span class="number">0</span>;</div><div class="line">        <span class="keyword">if</span> (sk-&gt;tp_pinfo.af_tcp.accept_queue)</div><div class="line">            <span class="keyword">break</span>;</div><div class="line">        err = -EINVAL;</div><div class="line">        <span class="keyword">if</span> (sk-&gt;state != TCP_LISTEN)</div><div class="line">            <span class="keyword">break</span>;</div><div class="line">        err = sock_intr_errno(timeo);</div><div class="line">        <span class="keyword">if</span> (signal_pending(current))  <span class="comment">// 如果有信号到来，则跳出循环，停止阻塞</span></div><div class="line">            <span class="keyword">break</span>;</div><div class="line">        err = -EAGAIN;</div><div class="line">        <span class="keyword">if</span> (!timeo) <span class="comment">// 超时，或者是非阻塞操作，则跳出循环</span></div><div class="line">            <span class="keyword">break</span>;</div><div class="line">    &#125;</div><div class="line">    current-&gt;state = TASK_RUNNING;</div><div class="line">    remove_wait_queue(sk-&gt;sleep, &amp;wait); <span class="comment">// 把该进程从等待队列中删除</span></div><div class="line">    <span class="keyword">return</span> err;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2006/03/02/Block-NonBlock-In-Kernel/" class="archive-article-date">
+  	<time datetime="2006-03-01T16:00:00.000Z" itemprop="datePublished"><i class="icon-clock"></i>2006-03-02</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Blocking/">Blocking</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Kernel/">Kernel</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux/">Linux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Thread/">Thread</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-Send-RST-Kernel" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2006/03/01/Send-RST-Kernel/">如何在kernel里发送RST包</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>kernel里发送RST包比较麻烦，首先你需要构造一个skb就够（很害怕吧！呵呵），再次要填充skb-&gt;data。当然就是填充ip、tcp头了。第一步，我们可以偷懒，用先前接收到的skb（RST肯定是在接收到SYN，或者主动异常中止链接，之前对方的包已收到）做为蓝本来构造RST的skb，或者干脆就拿这个skb来用。在有netfilter的kernel里，最典范的代码应该在ipt_REJECT target中。以下摘录，并分析它：</p>
+        <p class="article-more-link">
+          <a class="article-more-a"  href="/2006/03/01/Send-RST-Kernel/#more">more >></a>
+        </p>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2006/03/01/Send-RST-Kernel/" class="archive-article-date">
+  	<time datetime="2006-03-01T05:00:00.000Z" itemprop="datePublished"><i class="icon-clock"></i>2006-03-01</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux/">Linux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Netfilter/">Netfilter</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/TCP/">TCP</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <nav id="page-nav">
+      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
+    </nav>
   
 
 
@@ -457,7 +791,7 @@ Cloud &lt;-&gt; Board router &lt;-&gt; Nodes (things connected)
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/DTLS/" style="font-size: 10px;">DTLS</a> <a href="/tags/Embeded/" style="font-size: 10px;">Embeded</a> <a href="/tags/Family/" style="font-size: 10px;">Family</a> <a href="/tags/Hangzhou/" style="font-size: 10px;">Hangzhou</a> <a href="/tags/IoT/" style="font-size: 20px;">IoT</a> <a href="/tags/Photography/" style="font-size: 10px;">Photography</a> <a href="/tags/RTOS/" style="font-size: 20px;">RTOS</a> <a href="/tags/handshake/" style="font-size: 10px;">handshake</a> <a href="/tags/mbed/" style="font-size: 10px;">mbed</a> <a href="/tags/mbedOS/" style="font-size: 10px;">mbedOS</a> <a href="/tags/mbedTLS/" style="font-size: 10px;">mbedTLS</a>
+    				<a href="/tags/Blocking/" style="font-size: 10px;">Blocking</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/Clocksource/" style="font-size: 10px;">Clocksource</a> <a href="/tags/DTLS/" style="font-size: 10px;">DTLS</a> <a href="/tags/Embeded/" style="font-size: 10px;">Embeded</a> <a href="/tags/FTP/" style="font-size: 10px;">FTP</a> <a href="/tags/Family/" style="font-size: 10px;">Family</a> <a href="/tags/HRTimer/" style="font-size: 10px;">HRTimer</a> <a href="/tags/Hangzhou/" style="font-size: 10px;">Hangzhou</a> <a href="/tags/IoT/" style="font-size: 13.33px;">IoT</a> <a href="/tags/Kernel/" style="font-size: 16.67px;">Kernel</a> <a href="/tags/Linux/" style="font-size: 20px;">Linux</a> <a href="/tags/Memory/" style="font-size: 10px;">Memory</a> <a href="/tags/Netfilter/" style="font-size: 13.33px;">Netfilter</a> <a href="/tags/Photography/" style="font-size: 10px;">Photography</a> <a href="/tags/RTOS/" style="font-size: 13.33px;">RTOS</a> <a href="/tags/TCP/" style="font-size: 10px;">TCP</a> <a href="/tags/Thread/" style="font-size: 13.33px;">Thread</a> <a href="/tags/Timekeeping/" style="font-size: 10px;">Timekeeping</a> <a href="/tags/buddy/" style="font-size: 10px;">buddy</a> <a href="/tags/handshake/" style="font-size: 10px;">handshake</a> <a href="/tags/mbed/" style="font-size: 10px;">mbed</a> <a href="/tags/mbedOS/" style="font-size: 10px;">mbedOS</a> <a href="/tags/mbedTLS/" style="font-size: 10px;">mbedTLS</a>
     			</div>
     	</section>
     

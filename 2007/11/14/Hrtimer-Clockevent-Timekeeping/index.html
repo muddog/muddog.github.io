@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" >
+  <link rel="dns-prefetch" href="http://muddog.github.io">
+  <title>Linux Kernel Timekeeping | MudDog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="kernel-2.6.22中的arm arch加入了对dynticks, clocksource/event支持. imx31的BSP在clock这里有一些改动. 找了些kernel clock及timer子系统近来的变化, 总结一下。一般来说Soft-Timer (timer wheel / hrtimer) 都是由Hardware-Timer(时钟中断之类)以及相关的clock source(">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux Kernel Timekeeping">
+<meta property="og:url" content="http://muddog.github.io/2007/11/14/Hrtimer-Clockevent-Timekeeping/index.html">
+<meta property="og:site_name" content="MudDog">
+<meta property="og:description" content="kernel-2.6.22中的arm arch加入了对dynticks, clocksource/event支持. imx31的BSP在clock这里有一些改动. 找了些kernel clock及timer子系统近来的变化, 总结一下。一般来说Soft-Timer (timer wheel / hrtimer) 都是由Hardware-Timer(时钟中断之类)以及相关的clock source(">
+<meta property="og:updated_time" content="2016-12-16T13:43:53.282Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Linux Kernel Timekeeping">
+<meta name="twitter:description" content="kernel-2.6.22中的arm arch加入了对dynticks, clocksource/event支持. imx31的BSP在clock这里有一些改动. 找了些kernel clock及timer子系统近来的变化, 总结一下。一般来说Soft-Timer (timer wheel / hrtimer) 都是由Hardware-Timer(时钟中断之类)以及相关的clock source(">
+  
+    <link rel="alternative" href="/atom.xml" title="MudDog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link rel="stylesheet" href="/main.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div class="left-col">
+      <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			<img src="/avatar.png" class="js-avatar">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">豆芽</a></h1>
+		</hgroup>
+
+		
+
+		<nav class="header-menu">
+			<ul>
+			
+				<li><a href="/">Home</a></li>
+	        
+				<li><a href="/tags/IoT">IoT</a></li>
+	        
+				<li><a href="/tags/embeded">Embeded</a></li>
+	        
+				<li><a href="/tags/photo">Photograph</a></li>
+	        
+			</ul>
+		</nav>
+		<nav class="header-smart-menu">
+	        
+    		
+    			
+    			<a class="js-smart-menu" data-idx="0" href="javascript:void(0)">所有文章</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="1" href="javascript:void(0)">标签</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="2" href="javascript:void(0)">关于我</a>
+    			
+    			
+            
+		</nav>
+		<nav class="header-nav">
+			<div class="social">
+				
+					<a class="github" target="_blank" href="https://github.com/muddog" title="github">github</a>
+		        
+					<a class="weibo" target="_blank" href="http://weibo.com/muddogxp/" title="weibo">weibo</a>
+		        
+					<a class="zhihu" target="_blank" href="https://www.zhihu.com/people/muddog" title="zhihu">zhihu</a>
+		        
+					<a class="linkedin" target="_blank" href="http://www.linkedin.com/in/xinyu-chen-eric" title="linkedin">linkedin</a>
+		        
+			</div>
+		</nav>
+	</header>		
+</div>
+
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"><i class="icon-list"></i></div>
+  		<h1 class="header-author js-mobile-header hide">豆芽</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				
+					<img src="/avatar.png" class="js-avatar">
+				
+			</div>
+			<hgroup>
+			  <h1 class="header-author">豆芽</h1>
+			</hgroup>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">Home</a></li>
+		        
+					<li><a href="/tags/IoT">IoT</a></li>
+		        
+					<li><a href="/tags/embeded">Embeded</a></li>
+		        
+					<li><a href="/tags/photo">Photograph</a></li>
+		        
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+						<a class="github" target="_blank" href="https://github.com/muddog" title="github">github</a>
+			        
+						<a class="weibo" target="_blank" href="http://weibo.com/muddogxp/" title="weibo">weibo</a>
+			        
+						<a class="zhihu" target="_blank" href="https://www.zhihu.com/people/muddog" title="zhihu">zhihu</a>
+			        
+						<a class="linkedin" target="_blank" href="http://www.linkedin.com/in/xinyu-chen-eric" title="linkedin">linkedin</a>
+			        
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+
+      <div class="body-wrap">
+        <article id="post-Hrtimer-Clockevent-Timekeeping" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Linux Kernel Timekeeping
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>kernel-2.6.22中的arm arch加入了对dynticks, clocksource/event支持. imx31的BSP在clock这里有一些改动. 找了些kernel clock及timer子系统近来的变化, 总结一下。<br>一般来说Soft-Timer (timer wheel / hrtimer) 都是由Hardware-Timer(时钟中断之类)以及相关的clock source(e.g GPT in Soc)驱动, 所以我打算先从clock这层开始介绍, 接着是soft-timer, kernel timekeeping, 最后来看一些应用.</p>
+<a id="more"></a>
+<h2 id="Clock-Source"><a href="#Clock-Source" class="headerlink" title="Clock Source"></a>Clock Source</h2><p>clock source定义了一个clock device的基本属性及行为, 这些clock device一般都有计数, 定时, 产生中断能力, 比如GPT. 结构定义如下:<br><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">struct</span> clocksource &#123;</div><div class="line">    <span class="keyword">char</span> *name;</div><div class="line">    <span class="keyword">struct</span> list_head <span class="built_in">list</span>;</div><div class="line">    <span class="keyword">int</span> rating;</div><div class="line">    <span class="keyword">cycle_t</span> (*read)(<span class="keyword">void</span>);</div><div class="line">    <span class="keyword">cycle_t</span> mask;</div><div class="line">    u32 mult; <span class="comment">/* cycle -&gt; xtime interval, maybe two clock cycle trigger one interrupt (one xtime interval) */</span></div><div class="line">    u32 shift;</div><div class="line">    <span class="keyword">unsigned</span> <span class="keyword">long</span> flags;</div><div class="line">    <span class="keyword">cycle_t</span> (*vread)(<span class="keyword">void</span>);</div><div class="line">    <span class="keyword">void</span> (*resume)(<span class="keyword">void</span>);</div><div class="line">    <span class="comment">/* timekeeping specific data, ignore */</span></div><div class="line">    <span class="keyword">cycle_t</span> cycle_interval; <span class="comment">/* just the rate of GPT count per OS HZ */</span></div><div class="line">    u64    xtime_interval; <span class="comment">/* xtime_interval = cycle_interval * mult. */</span></div><div class="line">    <span class="keyword">cycle_t</span> cycle_last ____cacheline_aligned_in_smp; <span class="comment">/* last cycle in rate count */</span></div><div class="line">    u64 xtime_nsec; <span class="comment">/* cycle count, remain from xtime.tv_nsec </span></div><div class="line">                     * now nsec rate count offset = xtime_nsec +                              </div><div class="line">                     * xtime.tv_nsec &lt;&lt; shift */</div><div class="line">    s64 error;</div><div class="line">&#125;;</div></pre></td></tr></table></figure></p>
+<p>最重要的成员是read(), cycle_last和cycle_interval. 分别定义了读取clock device count 寄存器当前计数值接口, 保存上一次周期计数值和每个tick周期间隔值. 这个结构内的值, 无论是cycle_t, 还是u64类型(实际cycle_t就是u64)都是计数值(cycle), 而不是nsec, sec和jiffies. read()是整个kernel读取精确的单调时间计数的接口, kernel会用它来计算其他时间, 比如:jiffies, xtime.<br>clocksource的引入, 解决了之前kernel各个arch都有自己的clock device的管理方式, 基本都隐藏在MSL层, kernel core 及driver很难访问的问题. 它导出了以下接口:</p>
+<ol>
+<li>clocksource_register() 注册clocksource</li>
+<li>clocksource_get_next() 获取当前clocksource设备</li>
+<li>clocksource_read() 读取clock, 实际跑到clocksource-&gt;read()</li>
+</ol>
+<p>当driver处理的时间精度比较高的时, 可以通过上面的接口, 直接拿clock device来读.<br>当然目前ticker时钟中断源也会以clocksource的形式存在.</p>
+<h2 id="Clock-Event"><a href="#Clock-Event" class="headerlink" title="Clock Event"></a>Clock Event</h2><p>Clock event的主要作用是分发clock事件及设置下一次触发条件. 在没有clock event之前, 时钟中断都是周期性地产生, 也就是熟知的jiffies和HZ. </p>
+<p>Clock Event device主要的结构:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">struct</span> clock_event_device &#123;</div><div class="line">    <span class="keyword">const</span> <span class="keyword">char</span>        *name;</div><div class="line">    <span class="keyword">unsigned</span> <span class="keyword">int</span>        features;</div><div class="line">    <span class="keyword">unsigned</span> <span class="keyword">long</span>        max_delta_ns;</div><div class="line">    <span class="keyword">unsigned</span> <span class="keyword">long</span>        min_delta_ns;</div><div class="line">    <span class="keyword">unsigned</span> <span class="keyword">long</span>        mult;</div><div class="line">    <span class="keyword">int</span>            shift;</div><div class="line">    <span class="keyword">int</span>            rating;</div><div class="line">    <span class="keyword">int</span>            irq;</div><div class="line">    <span class="keyword">cpumask_t</span>        cpumask;</div><div class="line">    <span class="keyword">int</span>            (*set_next_event)(<span class="keyword">unsigned</span> <span class="keyword">long</span> evt,</div><div class="line">                         <span class="keyword">struct</span> clock_event_device *);</div><div class="line">    <span class="keyword">void</span>            (*set_mode)(<span class="keyword">enum</span> clock_event_mode mode,</div><div class="line">                     <span class="keyword">struct</span> clock_event_device *);</div><div class="line">    <span class="keyword">void</span>            (*event_handler)(<span class="keyword">struct</span> clock_event_device *);</div><div class="line">    <span class="keyword">void</span>            (*broadcast)(<span class="keyword">cpumask_t</span> mask);</div><div class="line">    <span class="keyword">struct</span> list_head    <span class="built_in">list</span>;</div><div class="line">    <span class="keyword">enum</span> clock_event_mode    mode;</div><div class="line">    <span class="keyword">ktime_t</span>            next_event;</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<p>最重要的是set_next_event(), event_handler(). 前者是设置下一个clock事件的触发条件, 一般就是往clock device里重设一下定时器. 后者是event handler, 事件处理函数. 该处理函数会在时钟中断ISR里被调用. 如果这个clock用来做为ticker时钟, 那么handler的执行和之前kernel的时钟中断ISR基本相同, 类似timer_tick(). 事件处理函数可以在运行时动态替换, 这就给kernel一个改变整个时钟中断处理方式的机会, 也就给highres tick及dynamic tick一个动态挂载的机会. 目前kernel内部有periodic/highres/dynamic tick三种时钟中断处理方式. 后面会介绍.</p>
+<h2 id="hrtimer-amp-timer-wheel"><a href="#hrtimer-amp-timer-wheel" class="headerlink" title="hrtimer &amp; timer wheel"></a>hrtimer &amp; timer wheel</h2><p>首先说一下timer wheel. 它就是kernel一直采用的基于jiffies的timer机制, 接口包括init_timer(), mod_timer(), del_timer()等, 很熟悉把. hrtimer 的出现, 并没有抛弃老的timer wheel机制(也不太可能抛弃:)). hrtimer做为kernel里的timer定时器, 而timer wheel则主要用来做timeout定时器. 分工比较明确. hrtimers采用红黑树来组织timers, 而timer wheel采用链表和桶. hrtimer精度由原来的timer wheel的jiffies提高到nanosecond. 主要用于向应用层提供nanosleep, posix-timers和itimer接口, 当然驱动和其他子系统也会需要high resolution的timer. kernel 里原先每秒周期性地产生HZ个ticker(中断), 被在下一个过期的hrtimer的时间点上产生中断代替. 也就是说时钟中断不再是周期性的, 而是由timer来驱动(靠clockevent的set_next_event接口设置下一个事件中断), 只要没有hrtimer加载, 就没有中断. 但是为了保证系统时间(进程时间统计, jiffies的维护)更新, 每个tick_period(NSEC_PER_SEC/HZ, 再次强调hrtimer精度是nsec)都会有一个叫做tick_sched_timer的hrtimer加载.<br>接下来对比一下, hrtimer引入之前及之后, kernel里时钟中断的处理的不同. (这里都是基于arm arch的source去分析)</p>
+<h3 id="no-hrtimer"><a href="#no-hrtimer" class="headerlink" title="no hrtimer"></a>no hrtimer</h3><p>kernel 起来, setup_arch()之后的time_init()会去初始化相应machine结构下的timer. 初始化timer函数都在各个machine的体系结构代码中, 初始化完硬件时钟, 注册中断服务函数, 使能时钟中断. 中断服务程序会清中断, 调用timer_tick(), 它执行:<br><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">profile_tick(); <span class="comment">/* kernel profile, 不是很了解 */</span></div><div class="line">do_timer(<span class="number">1</span>); <span class="comment">/* 更新jiffies */</span></div><div class="line">update_process_times(); <span class="comment">/* 计算进程耗时, 唤起TIMER_SOFTIRQ(timer wheel), 重新计算调度时间片等等 */</span></div></pre></td></tr></table></figure></p>
+<p>最后中断服务程序设置定时器, 使其在下一个tick产生中断.</p>
+<p>这样的框架, 使得high-res的timer很难加入. 所有中断处理code都在体系结构代码里被写死, 并且代码重用率很低, 毕竟大多的arch都会写同样的中断处理函数.</p>
+<h3 id="hrtimer"><a href="#hrtimer" class="headerlink" title="hrtimer"></a>hrtimer</h3><p>kernel 里有了clockevent/source的引入, 就把clocksource的中断以一种事件的方式被抽象出来. 事件本身的处理交给event handler. handler可以在kernel里做替换从而改变时钟中断的行为. 时钟中断ISR会看上去象这样:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">static</span> irqreturn_t <span class="title">timer_interrupt</span><span class="params">(<span class="keyword">int</span> irq, <span class="keyword">void</span> *dev_id)</span></span></div><div class="line">&#123;</div><div class="line">    <span class="comment">/* clear timer interrupt flag */</span></div><div class="line">    .....</div><div class="line">    <span class="comment">/* call clock event handler */</span></div><div class="line">    arch_clockevent.event_handler(&amp;arch_clockevent);</div><div class="line">    ....</div><div class="line">    <span class="keyword">return</span> IRQ_HANDLED;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>event_handler 在注册clockevent device时, 会被默认设置成tick_handle_periodic(). 所以kernel刚起来的时候, 时钟处理机制仍然是periodic的, ticker中断周期性的产生. tick_handle_periodic()会做和timer_tick差不多的事情, 然后调clockevents_program_event() =&gt; arch_clockevent.set_next_event()去设置下一个周期的定时器. tick-common.c里把原来kernel时钟的处理方式在clockevent框架下实现了, 这就是periodic tick的时钟机制.</p>
+<p>hres tick机制在第一个TIMER SOFTIRQ里会替换掉periodic tick, 当然要符合一定条件, 比如command line里没有把hres(highres=off)禁止掉, clocksource/event支持hres和oneshot的能力. 这里的切换做的比较ugly, 作者的comments也提到了, 每次timer softirq被调度, 都要调用hrtimer_run_queues()检查一遍hres是否active, 如果能在timer_init()里就把clocksource/event的条件check过, 直接切换到hres就最好了, 不知道是不是有什么限制条件. TIMER SOFTIRQ代码如下:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">run_timer_softirq</span><span class="params">(<span class="keyword">struct</span> softirq_action *h)</span></span></div><div class="line">&#123;</div><div class="line">    <span class="keyword">tvec_base_t</span> *base = __get_cpu_var(tvec_bases);</div><div class="line">    hrtimer_run_queues(); <span class="comment">/* 有机会就切换到hres或者nohz */</span></div><div class="line"></div><div class="line">    <span class="keyword">if</span> (time_after_eq(jiffies, base-&gt;timer_jiffies))</div><div class="line">        __run_timers(base); <span class="comment">/* timer wheel */</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>切换的过程比较简单, 用hrtimer_interrupt()替换当前clockevent hander, 加载一个hrtimer: tick_sched_timer在下一个tick_period过期, retrigger下一次事件. hrtimer_interrupt ()将过期的hrtimers从红黑树上摘下来, 放到相应clock_base-&gt;cpu_base-&gt;cb_pending列表里, 这些过期timers会在HRTIMER_SOFTIRQ里执行. 然后根据剩余的最早过期的timer来retrigger下一个event, 再调度HRTIMER_SOFTIRQ. hrtimer softirq执行那些再cb_pending上的过期定时器函数. tick_sched_timer这个hrtimer在每个tick_period都会过期, 执行过程和timer_tick()差不多, 只是在最后调用hrtimer_forward将自己加载到下一个周期里去, 保证每个tick_period都能正确更新kernel内部时间统计.</p>
+<h2 id="Timekeeping"><a href="#Timekeeping" class="headerlink" title="Timekeeping"></a>Timekeeping</h2><p>Timekeeping子系统负责更新xtime, 调整误差, 及提供get/settimeofday接口. 为了便于理解, 首先介绍一些概念:</p>
+<p><strong>Times in Kernel</strong></p>
+<p>kernel的time基本类型:<br>1) system time - A monotonically increasing value that represents the amount of time the system has been running. 单调增长的系统运行时间, 可以通过time source, xtime及wall_to_monotonic计算出来.<br>2) wall time - A value representing the the human time of day, as seen on a wrist-watch. Realtime时间: xtime.<br>3) time source - A representation of a free running counter running at a known frequency, usually in hardware, e.g GPT. 可以通过clocksource-&gt;read()得到counter值<br>4) tick - A periodic interrupt generated by a hardware-timer, typically with a fixed interval<br>defined by HZ: jiffies</p>
+<p>这些time之间互相关联, 互相可以转换.<br><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">system_time = xtime + cyc2ns(clock-&gt;read() – clock-&gt;cycle_last) + wall_to_monotonic;</div><div class="line">real_time = xtime + cyc2ns(clock-&gt;read() – clock-&gt;cycle_last)</div></pre></td></tr></table></figure></p>
+<p>也就是说real time是从1970年开始到现在的nanosecond, 而system time是系统启动到现在的nanosecond.<br>这两个是最重要的时间, 由此hrtimer可以基于这两个time来设置过期时间. 所以引入两个clock base.</p>
+<p><strong>Clock Base</strong></p>
+<p>CLOCK_REALTIME: base在实际的wall time<br>CLOCK_MONOTONIC: base在系统运行system time<br>hrtimer可以选择其中之一, 来设置expire time, 可以是实际的时间, 也可以是相对系统的时间.<br>他们提供get_time()接口:<br>CLOCK_REALTIME 调用ktime_get_real()来获得真实时间, 该函数用上面提到的等式计算出realtime.<br>CLOCK_MONOTONIC 调用ktime_get(), 用system_time的等式获得monotonic time.</p>
+<p>timekeeping提供两个接口do_gettimeofday()/do_settimeofday(), 都是针对realtime操作. 用户空间对gettimeofday的syscall也会最终跑到这里来.do<em>gettimeofday()会调用\</em>_get_realtime_clock_ts()获得时间, 然后转成timeval.<br>do_settimeofday(), 将用户设置的时间更新到xtime, 重新计算xtime到monotonic的转换值, 最后通知hrtimers子系统时间变更.</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">do_settimeofday</span><span class="params">(<span class="keyword">struct</span> timespec *tv)</span></span></div><div class="line">&#123;</div><div class="line">    <span class="keyword">unsigned</span> <span class="keyword">long</span> flags;</div><div class="line">    <span class="keyword">time_t</span> wtm_sec, sec = tv-&gt;tv_sec;</div><div class="line">    <span class="keyword">long</span> wtm_nsec, nsec = tv-&gt;tv_nsec;</div><div class="line">    <span class="keyword">if</span> ((<span class="keyword">unsigned</span> <span class="keyword">long</span>)tv-&gt;tv_nsec &gt;= NSEC_PER_SEC)</div><div class="line">        <span class="keyword">return</span> -EINVAL;</div><div class="line"></div><div class="line">    write_seqlock_irqsave(&amp;xtime_lock, flags);</div><div class="line"></div><div class="line">    nsec -= __get_nsec_offset();</div><div class="line"></div><div class="line">    wtm_sec = wall_to_monotonic.tv_sec + (xtime.tv_sec - sec);</div><div class="line">    wtm_nsec = wall_to_monotonic.tv_nsec + (xtime.tv_nsec - nsec);</div><div class="line">    set_normalized_timespec(&amp;xtime, sec, nsec); <span class="comment">/* 重新计算xtime: 用户设置的时间减去上一个周期到现在的nsec */</span></div><div class="line">    set_normalized_timespec(&amp;wall_to_monotonic, wtm_sec, wtm_nsec); <span class="comment">/* 重新调整wall_to_monotonic */</span></div><div class="line">    clock-&gt;error = <span class="number">0</span>;</div><div class="line">    ntp_clear();</div><div class="line">    update_vsyscall(&amp;xtime, clock);</div><div class="line">    write_sequnlock_irqrestore(&amp;xtime_lock, flags);</div><div class="line">    <span class="comment">/* signal hrtimers about time change */</span></div><div class="line">    clock_was_set();</div><div class="line"></div><div class="line">    <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="Userspace-Application"><a href="#Userspace-Application" class="headerlink" title="Userspace Application"></a>Userspace Application</h2><p>hrtimer的引入, 对用户最有用的接口如下:</p>
+<h3 id="Clock-API"><a href="#Clock-API" class="headerlink" title="Clock API"></a>Clock API</h3><p>获取对应clock的时间<br><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">clock_gettime(<span class="keyword">clockid_t</span>, <span class="keyword">struct</span> timespec *)</div></pre></td></tr></table></figure></p>
+<p>设置对应clock时间<br><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">clock_settime(<span class="keyword">clockid_t</span>, <span class="keyword">const</span> <span class="keyword">struct</span> timespec *)</div></pre></td></tr></table></figure></p>
+<p>进程nano sleep<br><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">clock_nanosleep(<span class="keyword">clockid_t</span>, <span class="keyword">int</span>, <span class="keyword">const</span> <span class="keyword">struct</span> timespec *, <span class="keyword">struct</span> timespec *)</div></pre></td></tr></table></figure></p>
+<p>获取时间精度, 一般是nanosec<br><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">clock_getres(<span class="keyword">clockid_t</span>, <span class="keyword">struct</span> timespec *)</div></pre></td></tr></table></figure></p>
+<p>clockid_t 定义了四种clock:</p>
+<p>CLOCK_REALTIME - System-wide realtime clock. Setting this clock requires appropriate privileges.<br>CLOCK_MONOTONIC - Clock that cannot be set and represents monotonic time since some unspecified starting point.<br>CLOCK_PROCESS_CPUTIME_ID - High-resolution per-process timer from the CPU.<br>CLOCK_THREAD_CPUTIME_ID - Thread-specific CPU-time clock.<br>前两者前面提到了, 后两个是和进程/线程统计时间有关系, 还没有仔细研究过, 是utime/stime之类的时间. 应用层可以利用这四种clock, 提高灵活性及精度.</p>
+<h3 id="Timer-API"><a href="#Timer-API" class="headerlink" title="Timer API"></a>Timer API</h3><p>Timer 可以建立进程定时器，单次或者周期性定时。</p>
+<p>创建定时器<br><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">timer_create</span><span class="params">(<span class="keyword">clockid_t</span> clockid, <span class="keyword">struct</span> sigevent *<span class="keyword">restrict</span> evp, <span class="keyword">timer_t</span> *<span class="keyword">restrict</span> timerid)</span></span>;</div></pre></td></tr></table></figure></p>
+<p>clockid - 在哪个clock base下创建定时器。<br>evp (sigevent) - 指定定时器到期后内核发送哪个信号给进程，以及信号所带参数；默认为SIGALRM。<br>timerid - 所建timer的id号。<br>在signal 处理函数里，可以通过siginfo_t.si_timerid 获得当前的信号是由哪个timer过期触发的。试验了一下，最多可创建的timer数目和ulimit里的pending signals的有关系，不能超过pending signals的数量。</p>
+<p>获得timer的下次过期的时间。<br><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">timer_gettime</span><span class="params">(<span class="keyword">timer_t</span> timerid, <span class="keyword">struct</span> itimerspec *value)</span></span>;</div></pre></td></tr></table></figure></p>
+<p>设置定时器的过期时间及间隔周期。<br><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">timer_settime</span><span class="params">(<span class="keyword">timer_t</span> timerid, <span class="keyword">int</span> flags, <span class="keyword">const</span> <span class="keyword">struct</span> itimerspec *<span class="keyword">restrict</span> value, <span class="keyword">struct</span> itimerspec *<span class="keyword">restrict</span> ovalue)</span></span>;</div></pre></td></tr></table></figure></p>
+<p>删除定时器<br><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">timer_delete</span><span class="params">(<span class="keyword">timer_t</span> timerid)</span></span>;</div></pre></td></tr></table></figure></p>
+<p>这些系统调用都会建立一个posix_timer的hrtimer，在过期的时候发送信号给进程。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>hrtimer 及clockevent/source的引入对于kernel的实时性的提高有很大贡献，也将clock的处理从体系结构的代码中抽象了出来，增强了代码的可重用性。并且对于posix的time／timer标准有了强有力的支持，提高了用户空间的应用程序的时间处理精度及灵活性。如果应用层在使用这些 syscall时有任何不解之处，直接看看hrtimer的code，对于处理问题，理解OS的行为都有很大帮助。</p>
+<p>参考资料:<br>[1] <a href="http://tglx.de/projects/hrtimers/ols2006-hrtimers.pdf" target="_blank" rel="external">http://tglx.de/projects/hrtimers/ols2006-hrtimers.pdf</a><br>[2] <a href="http://www.linuxsymposium.org/2006/linuxsymposium_procv1.pdf" target="_blank" rel="external">http://www.linuxsymposium.org/2006/linuxsymposium_procv1.pdf</a><br>[3] Documentation/hrtimers/highres.txt<br>[4] Documentation/hrtimers/hrtimers.txt<br>[5] <a href="http://sourceforge.net/projects/high-res-timers/" target="_blank" rel="external">http://sourceforge.net/projects/high-res-timers/</a></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2007/11/14/Hrtimer-Clockevent-Timekeeping/" class="archive-article-date">
+  	<time datetime="2007-11-14T05:00:00.000Z" itemprop="datePublished"><i class="icon-clock"></i>2007-11-14</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Clocksource/">Clocksource</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/HRTimer/">HRTimer</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Kernel/">Kernel</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux/">Linux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Timekeeping/">Timekeeping</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+  
+<nav id="article-nav">
+  
+    <a href="/2009/04/25/Android-Recovery/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          Android Recovery模式
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2007/04/08/Kernel-Memory-Allocation/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Kernel中的内存分配方式</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+
+
+<div class="share_jia">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">Share to: &nbsp; </span>
+		<a class="jiathis_button_facebook"></a> 
+	    <a class="jiathis_button_twitter"></a>
+	    <a class="jiathis_button_plus"></a> 
+	    <a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	</div>
+	<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
+
+
+
+
+
+
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="Hrtimer-Clockevent-Timekeeping" data-title="Linux Kernel Timekeeping" data-url="http://muddog.github.io/2007/11/14/Hrtimer-Clockevent-Timekeeping/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"muddog"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
+
+
+
+
+
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+    	<div class="footer-left">
+    		&copy; 2016 豆芽
+    	</div>
+      	<div class="footer-right">
+      		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
+      	</div>
+    </div>
+  </div>
+</footer>
+    </div>
+    <script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: false,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false,
+		root: "/",
+		innerArchive: true
+	}
+</script>
+
+<script src="/./main.js"></script>
+
+
+    
+<div class="tools-col">
+  <ul class="btn-wrap">
+    
+      <li class="chose" data-hook="tools-section-all"><span class="text">全部</span><i class="icon-book"></i></li>
+    
+    
+      <li data-hook="tools-section-tag"><span class="text">标签</span><i class="icon-price-tags"></i></li>
+    
+    
+    
+      <li data-hook="tools-section-me"><span class="text">我</span><i class="icon-smile"></i></li>
+    
+  </ul>
+  <div class="tools-wrap">
+    
+    	<section class="tools-section tools-section-all chose">
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-tag">
+    			<div class="widget tagcloud" id="js-tagcloud">
+    				<a href="/tags/Blocking/" style="font-size: 10px;">Blocking</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/Clocksource/" style="font-size: 10px;">Clocksource</a> <a href="/tags/DTLS/" style="font-size: 10px;">DTLS</a> <a href="/tags/Embeded/" style="font-size: 10px;">Embeded</a> <a href="/tags/FTP/" style="font-size: 10px;">FTP</a> <a href="/tags/Family/" style="font-size: 10px;">Family</a> <a href="/tags/HRTimer/" style="font-size: 10px;">HRTimer</a> <a href="/tags/Hangzhou/" style="font-size: 10px;">Hangzhou</a> <a href="/tags/IoT/" style="font-size: 13.33px;">IoT</a> <a href="/tags/Kernel/" style="font-size: 16.67px;">Kernel</a> <a href="/tags/Linux/" style="font-size: 20px;">Linux</a> <a href="/tags/Memory/" style="font-size: 10px;">Memory</a> <a href="/tags/Netfilter/" style="font-size: 13.33px;">Netfilter</a> <a href="/tags/Photography/" style="font-size: 10px;">Photography</a> <a href="/tags/RTOS/" style="font-size: 13.33px;">RTOS</a> <a href="/tags/TCP/" style="font-size: 10px;">TCP</a> <a href="/tags/Thread/" style="font-size: 13.33px;">Thread</a> <a href="/tags/Timekeeping/" style="font-size: 10px;">Timekeeping</a> <a href="/tags/buddy/" style="font-size: 10px;">buddy</a> <a href="/tags/handshake/" style="font-size: 10px;">handshake</a> <a href="/tags/mbed/" style="font-size: 10px;">mbed</a> <a href="/tags/mbedOS/" style="font-size: 10px;">mbedOS</a> <a href="/tags/mbedTLS/" style="font-size: 10px;">mbedTLS</a>
+    			</div>
+    	</section>
+    
+
+    
+
+    
+    	<section class="tools-section tools-section-me">
+  	  	
+  	  		<div class="aboutme-wrap" id="js-aboutme">土狗一只&lt;br&gt;&lt;br&gt;码农&lt;br&gt;嵌入式</div>
+  	  	
+    	</section>
+    
+  </div>
+  
+</div>
+    <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+  </div>
+</body>
+</html>

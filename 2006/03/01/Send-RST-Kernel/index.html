@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" >
+  <link rel="dns-prefetch" href="http://muddog.github.io">
+  <title>如何在kernel里发送RST包 | MudDog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="kernel里发送RST包比较麻烦，首先你需要构造一个skb就够（很害怕吧！呵呵），再次要填充skb-&amp;gt;data。当然就是填充ip、tcp头了。第一步，我们可以偷懒，用先前接收到的skb（RST肯定是在接收到SYN，或者主动异常中止链接，之前对方的包已收到）做为蓝本来构造RST的skb，或者干脆就拿这个skb来用。在有netfilter的kernel里，最典范的代码应该在ipt_REJECT">
+<meta property="og:type" content="article">
+<meta property="og:title" content="如何在kernel里发送RST包">
+<meta property="og:url" content="http://muddog.github.io/2006/03/01/Send-RST-Kernel/index.html">
+<meta property="og:site_name" content="MudDog">
+<meta property="og:description" content="kernel里发送RST包比较麻烦，首先你需要构造一个skb就够（很害怕吧！呵呵），再次要填充skb-&amp;gt;data。当然就是填充ip、tcp头了。第一步，我们可以偷懒，用先前接收到的skb（RST肯定是在接收到SYN，或者主动异常中止链接，之前对方的包已收到）做为蓝本来构造RST的skb，或者干脆就拿这个skb来用。在有netfilter的kernel里，最典范的代码应该在ipt_REJECT">
+<meta property="og:updated_time" content="2016-12-16T13:43:53.287Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="如何在kernel里发送RST包">
+<meta name="twitter:description" content="kernel里发送RST包比较麻烦，首先你需要构造一个skb就够（很害怕吧！呵呵），再次要填充skb-&amp;gt;data。当然就是填充ip、tcp头了。第一步，我们可以偷懒，用先前接收到的skb（RST肯定是在接收到SYN，或者主动异常中止链接，之前对方的包已收到）做为蓝本来构造RST的skb，或者干脆就拿这个skb来用。在有netfilter的kernel里，最典范的代码应该在ipt_REJECT">
+  
+    <link rel="alternative" href="/atom.xml" title="MudDog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link rel="stylesheet" href="/main.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div class="left-col">
+      <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			<img src="/avatar.png" class="js-avatar">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">豆芽</a></h1>
+		</hgroup>
+
+		
+
+		<nav class="header-menu">
+			<ul>
+			
+				<li><a href="/">Home</a></li>
+	        
+				<li><a href="/tags/IoT">IoT</a></li>
+	        
+				<li><a href="/tags/embeded">Embeded</a></li>
+	        
+				<li><a href="/tags/photo">Photograph</a></li>
+	        
+			</ul>
+		</nav>
+		<nav class="header-smart-menu">
+	        
+    		
+    			
+    			<a class="js-smart-menu" data-idx="0" href="javascript:void(0)">所有文章</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="1" href="javascript:void(0)">标签</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="2" href="javascript:void(0)">关于我</a>
+    			
+    			
+            
+		</nav>
+		<nav class="header-nav">
+			<div class="social">
+				
+					<a class="github" target="_blank" href="https://github.com/muddog" title="github">github</a>
+		        
+					<a class="weibo" target="_blank" href="http://weibo.com/muddogxp/" title="weibo">weibo</a>
+		        
+					<a class="zhihu" target="_blank" href="https://www.zhihu.com/people/muddog" title="zhihu">zhihu</a>
+		        
+					<a class="linkedin" target="_blank" href="http://www.linkedin.com/in/xinyu-chen-eric" title="linkedin">linkedin</a>
+		        
+			</div>
+		</nav>
+	</header>		
+</div>
+
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"><i class="icon-list"></i></div>
+  		<h1 class="header-author js-mobile-header hide">豆芽</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				
+					<img src="/avatar.png" class="js-avatar">
+				
+			</div>
+			<hgroup>
+			  <h1 class="header-author">豆芽</h1>
+			</hgroup>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">Home</a></li>
+		        
+					<li><a href="/tags/IoT">IoT</a></li>
+		        
+					<li><a href="/tags/embeded">Embeded</a></li>
+		        
+					<li><a href="/tags/photo">Photograph</a></li>
+		        
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+						<a class="github" target="_blank" href="https://github.com/muddog" title="github">github</a>
+			        
+						<a class="weibo" target="_blank" href="http://weibo.com/muddogxp/" title="weibo">weibo</a>
+			        
+						<a class="zhihu" target="_blank" href="https://www.zhihu.com/people/muddog" title="zhihu">zhihu</a>
+			        
+						<a class="linkedin" target="_blank" href="http://www.linkedin.com/in/xinyu-chen-eric" title="linkedin">linkedin</a>
+			        
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+
+      <div class="body-wrap">
+        <article id="post-Send-RST-Kernel" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      如何在kernel里发送RST包
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>kernel里发送RST包比较麻烦，首先你需要构造一个skb就够（很害怕吧！呵呵），再次要填充skb-&gt;data。当然就是填充ip、tcp头了。第一步，我们可以偷懒，用先前接收到的skb（RST肯定是在接收到SYN，或者主动异常中止链接，之前对方的包已收到）做为蓝本来构造RST的skb，或者干脆就拿这个skb来用。在有netfilter的kernel里，最典范的代码应该在ipt_REJECT target中。以下摘录，并分析它：</p>
+<a id="more"></a>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">send_reset</span><span class="params">(<span class="keyword">struct</span> sk_buff *oldskb, <span class="keyword">int</span> local)</span></span></div><div class="line">&#123;</div><div class="line">    <span class="keyword">struct</span> sk_buff *nskb;</div><div class="line">    <span class="keyword">struct</span> tcphdr *otcph, *tcph;</div><div class="line">    <span class="keyword">struct</span> rtable *rt;</div><div class="line">    <span class="keyword">unsigned</span> <span class="keyword">int</span> otcplen;</div><div class="line">    <span class="keyword">u_int16_t</span> tmp_port;</div><div class="line">    <span class="keyword">u_int32_t</span> tmp_addr;</div><div class="line">    <span class="keyword">int</span> needs_ack;</div><div class="line">    <span class="keyword">int</span> hh_len;</div><div class="line"></div><div class="line">    <span class="comment">/* IP header checks: fragment, too short. */</span></div><div class="line">    <span class="keyword">if</span> (oldskb-&gt;nh.iph-&gt;frag_off &amp; htons(IP_OFFSET)</div><div class="line">        || oldskb-&gt;len &lt; (oldskb-&gt;nh.iph-&gt;ihl&lt;&lt;<span class="number">2</span>) + <span class="keyword">sizeof</span>(<span class="keyword">struct</span> tcphdr))</div><div class="line">        <span class="keyword">return</span>;</div><div class="line">    <span class="comment">// 获取老的skb的tcp头及tcp头及数据长度</span></div><div class="line">    otcph = (<span class="keyword">struct</span> tcphdr *)((<span class="keyword">u_int32_t</span>*)oldskb-&gt;nh.iph + oldskb-&gt;nh.iph-&gt;ihl);</div><div class="line">    otcplen = oldskb-&gt;len – oldskb-&gt;nh.iph-&gt;ihl*<span class="number">4</span>;</div><div class="line"></div><div class="line">    <span class="comment">/* No RST for RST. */</span></div><div class="line">    <span class="keyword">if</span> (otcph-&gt;rst) <span class="comment">// 收到的是RST包，显然不能再回RST</span></div><div class="line">        <span class="keyword">return</span>;</div><div class="line"></div><div class="line">    <span class="comment">/* Check checksum. */</span></div><div class="line">    <span class="keyword">if</span> (tcp_v4_check(otcph, otcplen, oldskb-&gt;nh.iph-&gt;saddr,</div><div class="line">             oldskb-&gt;nh.iph-&gt;daddr,</div><div class="line">             csum_partial((<span class="keyword">char</span> *)otcph, otcplen, <span class="number">0</span>)) != <span class="number">0</span>)</div><div class="line">        <span class="keyword">return</span>; <span class="comment">// tcp checksum 检查</span></div><div class="line"></div><div class="line">    <span class="keyword">if</span> ((rt = route_reverse(oldskb, local)) == <span class="literal">NULL</span>)</div><div class="line">        <span class="keyword">return</span>; <span class="comment">// 将老的skb中ip路由进行翻转，得到的路由表引用放入rt</span></div><div class="line"></div><div class="line">    hh_len = (rt-&gt;u.dst.dev-&gt;hard_header_len + <span class="number">15</span>)&amp;~<span class="number">15</span>; <span class="comment">// MAC头长度</span></div><div class="line"></div><div class="line">    <span class="comment">/* Copy skb (even if skb is about to be dropped, we can’t just</span></div><div class="line">           clone it because there may be other things, such as tcpdump,</div><div class="line">           interested in it). We also need to expand headroom in case</div><div class="line">       hh_len of incoming interface &lt; hh_len of outgoing interface */</div><div class="line">    nskb = skb_copy_expand(oldskb, hh_len, skb_tailroom(oldskb),</div><div class="line">                   GFP_ATOMIC);  <span class="comment">// 用copy expand复制一份skb，和clone的区别在于，同时复制数据区，而clone只是增加data区引用计数。得到新的待发送的skb</span></div><div class="line">    <span class="keyword">if</span> (!nskb) &#123;</div><div class="line">        dst_release(&amp;rt-&gt;u.dst);</div><div class="line">        <span class="keyword">return</span>;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    dst_release(nskb-&gt;dst); <span class="comment">// 释放老skb中的路由表引用</span></div><div class="line">    nskb-&gt;dst = &amp;rt-&gt;u.dst; <span class="comment">// 使用新的翻转后的路由</span></div><div class="line"></div><div class="line">    <span class="comment">/* This packet will not be the same as the other: clear nf fields */</span></div><div class="line">    nf_conntrack_put(nskb-&gt;nfct); <span class="comment">// 很重要！必须释放conntrack结构，由于RST是由LOCAL发出，所以发出时不应该带conntrack，否则LOCAL_OUT 的conntrack hook会忽略这个包。</span></div><div class="line">    nskb-&gt;nfct = <span class="literal">NULL</span>; <span class="comment">// 清楚一些netfilter的成员</span></div><div class="line">    nskb-&gt;nfcache = <span class="number">0</span>;</div><div class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> CONFIG_NETFILTER_DEBUG</span></div><div class="line">    nskb-&gt;nf_debug = <span class="number">0</span>;</div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></div><div class="line">    nskb-&gt;nfmark = <span class="number">0</span>;</div><div class="line">    <span class="comment">// 新的skb中tcp header</span></div><div class="line">    tcph = (<span class="keyword">struct</span> tcphdr *)((<span class="keyword">u_int32_t</span>*)nskb-&gt;nh.iph + nskb-&gt;nh.iph-&gt;ihl);</div><div class="line"></div><div class="line">    <span class="comment">/* Swap source and dest */</span>  <span class="comment">// 交换tcp 源、目的端口号</span></div><div class="line">    tmp_addr = nskb-&gt;nh.iph-&gt;saddr;</div><div class="line">    nskb-&gt;nh.iph-&gt;saddr = nskb-&gt;nh.iph-&gt;daddr;</div><div class="line">    nskb-&gt;nh.iph-&gt;daddr = tmp_addr;</div><div class="line">    tmp_port = tcph-&gt;source;</div><div class="line">    tcph-&gt;source = tcph-&gt;dest;</div><div class="line">    tcph-&gt;dest = tmp_port;</div><div class="line"></div><div class="line">    <span class="comment">/* Truncate to length (no data) */</span>  <span class="comment">// 将tcp 数据区清空（RST包不需要带数据）</span></div><div class="line">    tcph-&gt;doff = <span class="keyword">sizeof</span>(<span class="keyword">struct</span> tcphdr)/<span class="number">4</span>;</div><div class="line">    skb_trim(nskb, nskb-&gt;nh.iph-&gt;ihl*<span class="number">4</span> + <span class="keyword">sizeof</span>(<span class="keyword">struct</span> tcphdr));</div><div class="line">    nskb-&gt;nh.iph-&gt;tot_len = htons(nskb-&gt;len);</div><div class="line"></div><div class="line">   <span class="comment">// 重新设置 seq ack_seq，分两种情况（TCP/IP详卷有描述）</span></div><div class="line">    <span class="keyword">if</span> (tcph-&gt;ack) &#123;  <span class="comment">// 异常关闭链接</span></div><div class="line">        needs_ack = <span class="number">0</span>;</div><div class="line">        tcph-&gt;seq = otcph-&gt;ack_seq;</div><div class="line">        tcph-&gt;ack_seq = <span class="number">0</span>;</div><div class="line">    &#125; <span class="keyword">else</span> &#123; <span class="comment">// 老skb为到端口不存在的链接请求</span></div><div class="line">        needs_ack = <span class="number">1</span>;</div><div class="line">        tcph-&gt;ack_seq = htonl(ntohl(otcph-&gt;seq) + otcph-&gt;syn + otcph-&gt;fin</div><div class="line">                      + otcplen – (otcph-&gt;doff&lt;&lt;<span class="number">2</span>));  <span class="comment">// ack_seq为老skb数据包的seq+len</span></div><div class="line">        tcph-&gt;seq = <span class="number">0</span>; <span class="comment">// seq 默认为0</span></div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">/* Reset flags */</span> <span class="comment">// 设置tcp头RST标志</span></div><div class="line">    ((<span class="keyword">u_int8_t</span> *)tcph)[<span class="number">13</span>] = <span class="number">0</span>;</div><div class="line">    tcph-&gt;rst = <span class="number">1</span>;</div><div class="line">    tcph-&gt;ack = needs_ack;</div><div class="line"></div><div class="line">    tcph-&gt;window = <span class="number">0</span>;</div><div class="line">    tcph-&gt;urg_ptr = <span class="number">0</span>;</div><div class="line"></div><div class="line">    <span class="comment">/* Adjust TCP checksum */</span></div><div class="line">    tcph-&gt;check = <span class="number">0</span>;</div><div class="line">    tcph-&gt;check = tcp_v4_check(tcph, <span class="keyword">sizeof</span>(<span class="keyword">struct</span> tcphdr),  <span class="comment">// 重新计算tcp checksum</span></div><div class="line">                   nskb-&gt;nh.iph-&gt;saddr,</div><div class="line">                   nskb-&gt;nh.iph-&gt;daddr,</div><div class="line">                   csum_partial((<span class="keyword">char</span> *)tcph,</div><div class="line">                        <span class="keyword">sizeof</span>(<span class="keyword">struct</span> tcphdr), <span class="number">0</span>));</div><div class="line"></div><div class="line">    <span class="comment">/* Adjust IP TTL, DF */</span></div><div class="line">    nskb-&gt;nh.iph-&gt;ttl = MAXTTL;</div><div class="line">    <span class="comment">/* Set DF, id = 0 */</span></div><div class="line">    nskb-&gt;nh.iph-&gt;frag_off = htons(IP_DF); <span class="comment">// 不要分片</span></div><div class="line">    nskb-&gt;nh.iph-&gt;id = <span class="number">0</span>;</div><div class="line"></div><div class="line">    <span class="comment">/* Adjust IP checksum */</span></div><div class="line">    nskb-&gt;nh.iph-&gt;check = <span class="number">0</span>; <span class="comment">// 重新计算ip checksum</span></div><div class="line">    nskb-&gt;nh.iph-&gt;check = ip_fast_csum((<span class="keyword">unsigned</span> <span class="keyword">char</span> *)nskb-&gt;nh.iph, </div><div class="line">                       nskb-&gt;nh.iph-&gt;ihl);</div><div class="line"></div><div class="line">    <span class="comment">/* "Never happens" */</span></div><div class="line">    <span class="keyword">if</span> (nskb-&gt;len &gt; nskb-&gt;dst-&gt;pmtu)</div><div class="line">        <span class="keyword">goto</span> free_nskb;</div><div class="line"></div><div class="line">    connection_attach(nskb, oldskb-&gt;nfct);</div><div class="line">    <span class="comment">// 调用nf hook，把包发出去。这里会从LOCAL_OUT 到 POST_ROUTING。</span></div><div class="line">    NF_HOOK(PF_INET, NF_IP_LOCAL_OUT, nskb, <span class="literal">NULL</span>, nskb-&gt;dst-&gt;dev,</div><div class="line">        ip_finish_output);</div><div class="line">    <span class="keyword">return</span>;</div><div class="line"></div><div class="line"> free_nskb:</div><div class="line">    kfree_skb(nskb);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2006/03/01/Send-RST-Kernel/" class="archive-article-date">
+  	<time datetime="2006-03-01T05:00:00.000Z" itemprop="datePublished"><i class="icon-clock"></i>2006-03-01</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux/">Linux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Netfilter/">Netfilter</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/TCP/">TCP</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+  
+<nav id="article-nav">
+  
+    <a href="/2006/03/02/Block-NonBlock-In-Kernel/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          kernel中的阻塞与非阻塞
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2005/11/12/Netfilter-FTP-Helper/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Netfilter FTP Helper源码分析</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+
+
+<div class="share_jia">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">Share to: &nbsp; </span>
+		<a class="jiathis_button_facebook"></a> 
+	    <a class="jiathis_button_twitter"></a>
+	    <a class="jiathis_button_plus"></a> 
+	    <a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	</div>
+	<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
+
+
+
+
+
+
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="Send-RST-Kernel" data-title="如何在kernel里发送RST包" data-url="http://muddog.github.io/2006/03/01/Send-RST-Kernel/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"muddog"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
+
+
+
+
+
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+    	<div class="footer-left">
+    		&copy; 2016 豆芽
+    	</div>
+      	<div class="footer-right">
+      		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
+      	</div>
+    </div>
+  </div>
+</footer>
+    </div>
+    <script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: false,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false,
+		root: "/",
+		innerArchive: true
+	}
+</script>
+
+<script src="/./main.js"></script>
+
+
+    
+<div class="tools-col">
+  <ul class="btn-wrap">
+    
+      <li class="chose" data-hook="tools-section-all"><span class="text">全部</span><i class="icon-book"></i></li>
+    
+    
+      <li data-hook="tools-section-tag"><span class="text">标签</span><i class="icon-price-tags"></i></li>
+    
+    
+    
+      <li data-hook="tools-section-me"><span class="text">我</span><i class="icon-smile"></i></li>
+    
+  </ul>
+  <div class="tools-wrap">
+    
+    	<section class="tools-section tools-section-all chose">
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-tag">
+    			<div class="widget tagcloud" id="js-tagcloud">
+    				<a href="/tags/Blocking/" style="font-size: 10px;">Blocking</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/Clocksource/" style="font-size: 10px;">Clocksource</a> <a href="/tags/DTLS/" style="font-size: 10px;">DTLS</a> <a href="/tags/Embeded/" style="font-size: 10px;">Embeded</a> <a href="/tags/FTP/" style="font-size: 10px;">FTP</a> <a href="/tags/Family/" style="font-size: 10px;">Family</a> <a href="/tags/HRTimer/" style="font-size: 10px;">HRTimer</a> <a href="/tags/Hangzhou/" style="font-size: 10px;">Hangzhou</a> <a href="/tags/IoT/" style="font-size: 13.33px;">IoT</a> <a href="/tags/Kernel/" style="font-size: 16.67px;">Kernel</a> <a href="/tags/Linux/" style="font-size: 20px;">Linux</a> <a href="/tags/Memory/" style="font-size: 10px;">Memory</a> <a href="/tags/Netfilter/" style="font-size: 13.33px;">Netfilter</a> <a href="/tags/Photography/" style="font-size: 10px;">Photography</a> <a href="/tags/RTOS/" style="font-size: 13.33px;">RTOS</a> <a href="/tags/TCP/" style="font-size: 10px;">TCP</a> <a href="/tags/Thread/" style="font-size: 13.33px;">Thread</a> <a href="/tags/Timekeeping/" style="font-size: 10px;">Timekeeping</a> <a href="/tags/buddy/" style="font-size: 10px;">buddy</a> <a href="/tags/handshake/" style="font-size: 10px;">handshake</a> <a href="/tags/mbed/" style="font-size: 10px;">mbed</a> <a href="/tags/mbedOS/" style="font-size: 10px;">mbedOS</a> <a href="/tags/mbedTLS/" style="font-size: 10px;">mbedTLS</a>
+    			</div>
+    	</section>
+    
+
+    
+
+    
+    	<section class="tools-section tools-section-me">
+  	  	
+  	  		<div class="aboutme-wrap" id="js-aboutme">土狗一只&lt;br&gt;&lt;br&gt;码农&lt;br&gt;嵌入式</div>
+  	  	
+    	</section>
+    
+  </div>
+  
+</div>
+    <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+  </div>
+</body>
+</html>

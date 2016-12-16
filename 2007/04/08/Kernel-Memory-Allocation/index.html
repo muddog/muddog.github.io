@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" >
+  <link rel="dns-prefetch" href="http://muddog.github.io">
+  <title>Kernel中的内存分配方式 | MudDog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="这周BSP那边碰到一个蛮严重的issue： 循环放电影，v4l2 output driver的 dma_alloc很容易就失败，kernel panic，dump出当前buddy系统的状态。初步分析是由于内存fragment导致没有足够大的连续内存分配给v4l output driver。开始debug首先通过/proc/buddyinfo 在播放电影时候不间断的dump buddy状态，发现大块">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel中的内存分配方式">
+<meta property="og:url" content="http://muddog.github.io/2007/04/08/Kernel-Memory-Allocation/index.html">
+<meta property="og:site_name" content="MudDog">
+<meta property="og:description" content="这周BSP那边碰到一个蛮严重的issue： 循环放电影，v4l2 output driver的 dma_alloc很容易就失败，kernel panic，dump出当前buddy系统的状态。初步分析是由于内存fragment导致没有足够大的连续内存分配给v4l output driver。开始debug首先通过/proc/buddyinfo 在播放电影时候不间断的dump buddy状态，发现大块">
+<meta property="og:updated_time" content="2016-12-16T13:43:53.285Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Kernel中的内存分配方式">
+<meta name="twitter:description" content="这周BSP那边碰到一个蛮严重的issue： 循环放电影，v4l2 output driver的 dma_alloc很容易就失败，kernel panic，dump出当前buddy系统的状态。初步分析是由于内存fragment导致没有足够大的连续内存分配给v4l output driver。开始debug首先通过/proc/buddyinfo 在播放电影时候不间断的dump buddy状态，发现大块">
+  
+    <link rel="alternative" href="/atom.xml" title="MudDog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link rel="stylesheet" href="/main.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div class="left-col">
+      <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			<img src="/avatar.png" class="js-avatar">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">豆芽</a></h1>
+		</hgroup>
+
+		
+
+		<nav class="header-menu">
+			<ul>
+			
+				<li><a href="/">Home</a></li>
+	        
+				<li><a href="/tags/IoT">IoT</a></li>
+	        
+				<li><a href="/tags/embeded">Embeded</a></li>
+	        
+				<li><a href="/tags/photo">Photograph</a></li>
+	        
+			</ul>
+		</nav>
+		<nav class="header-smart-menu">
+	        
+    		
+    			
+    			<a class="js-smart-menu" data-idx="0" href="javascript:void(0)">所有文章</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="1" href="javascript:void(0)">标签</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="2" href="javascript:void(0)">关于我</a>
+    			
+    			
+            
+		</nav>
+		<nav class="header-nav">
+			<div class="social">
+				
+					<a class="github" target="_blank" href="https://github.com/muddog" title="github">github</a>
+		        
+					<a class="weibo" target="_blank" href="http://weibo.com/muddogxp/" title="weibo">weibo</a>
+		        
+					<a class="zhihu" target="_blank" href="https://www.zhihu.com/people/muddog" title="zhihu">zhihu</a>
+		        
+					<a class="linkedin" target="_blank" href="http://www.linkedin.com/in/xinyu-chen-eric" title="linkedin">linkedin</a>
+		        
+			</div>
+		</nav>
+	</header>		
+</div>
+
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"><i class="icon-list"></i></div>
+  		<h1 class="header-author js-mobile-header hide">豆芽</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				
+					<img src="/avatar.png" class="js-avatar">
+				
+			</div>
+			<hgroup>
+			  <h1 class="header-author">豆芽</h1>
+			</hgroup>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">Home</a></li>
+		        
+					<li><a href="/tags/IoT">IoT</a></li>
+		        
+					<li><a href="/tags/embeded">Embeded</a></li>
+		        
+					<li><a href="/tags/photo">Photograph</a></li>
+		        
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+						<a class="github" target="_blank" href="https://github.com/muddog" title="github">github</a>
+			        
+						<a class="weibo" target="_blank" href="http://weibo.com/muddogxp/" title="weibo">weibo</a>
+			        
+						<a class="zhihu" target="_blank" href="https://www.zhihu.com/people/muddog" title="zhihu">zhihu</a>
+			        
+						<a class="linkedin" target="_blank" href="http://www.linkedin.com/in/xinyu-chen-eric" title="linkedin">linkedin</a>
+			        
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+
+      <div class="body-wrap">
+        <article id="post-Kernel-Memory-Allocation" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel中的内存分配方式
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>这周BSP那边碰到一个蛮严重的issue： 循环放电影，v4l2 output driver的 dma_alloc很容易就失败，kernel panic，dump出当前buddy系统的状态。<br>初步分析是由于内存fragment导致没有足够大的连续内存分配给v4l output driver。开始debug<br>首先通过/proc/buddyinfo 在播放电影时候不间断的dump buddy状态，发现大块内存块：256K － 4MB block 减少的很迅速，1－2小时后，buddy中就不存在大块连续内存。这证明了初步分析是正确的，但是还不知道是谁导致了fragment，是应用层，还是v4l2 driver本身？<br>接下来添加一个NORMAL zone（ARM体系中就DMA一个zone，所以application和dma都使用一个buddy系统），让普通内存分配和dma隔开。继续测试，发现dma zone中的内存块状态在最初很正常，但NORMAL zone的内存却在急剧减少，最终NORMAL zone已经没有足够内存给application，kernel转而向DMA zone申请，最终issue重现。</p>
+<p>现在问题很清楚了，application发生内存leak，很严重的leak。但是dma_alloc这边会没有问题马？Fred在看了我描述的问题后，指出了dma_alloc中算法的一些问题：当向buddy申请完足够size的2^的内存块后，该函数会释放在申请块中多余的page，加速了fragment。后来我们做了一个实验，将dma_alloc里的释放多余页的功能去掉，fragment的速度大大减缓。<br>经过上周对这个issue的研究，我开始重新总结kernel里对内存分配的方式和方法，总结如下：</p>
+<a id="more"></a>
+<h2 id="页分配"><a href="#页分配" class="headerlink" title="页分配"></a>页分配</h2><p><strong>unsigned long __get_free_pages(gfp_t gfp_mask, unsigned int order)</strong></p>
+<p>直接从buddy系统中获得原始页。最原始的分配方式。</p>
+<h2 id="slab分配器"><a href="#slab分配器" class="headerlink" title="slab分配器"></a>slab分配器</h2><p>1.通用 cache</p>
+<p><strong>void kmalloc(size_t size, gfp_t flags)</strong></p>
+<p>kmalloc 基于以下几种size的mem cache：32, 64, 128, 256, 512, 1,024, 2,048, 4,096,<br>8,192, 16,384, 32,768, 65,536 和 131,072 bytes。其本质也是调用kmem_cache_alloc来分配<br>object。所以kmalloc一次最大可分配的size为128KB。kmalloc分配速度很快，在分配时需注意gfp flag<br>参数：在不interrupt上下文（ISR, softirq, tasklet）及不可睡眠上下文使用GFP_ATOMIC。<br>内核还增加了内存清零的分配函数：kzalloc。</p>
+<p>2.专用 cache</p>
+<p><strong>kmem_cache_create()</strong><br><strong>void kmem_cache_alloc(struct kmem_cache cachep, gfp_t flags)</strong></p>
+<p>如果你需要频繁的分配和释放某个结构，建议不要采用kmalloc，而是自己在slab系统中创建memory cache。<br>指定该结构的object size。分配时使用kmem_cache_alloc。同样的slab object大小也有限制，一般情况<br>下一个MAX_OBJ_ORDER是5，也就是32个页，128KB。</p>
+<h2 id="非连续内存分配"><a href="#非连续内存分配" class="headerlink" title="非连续内存分配"></a>非连续内存分配</h2><p><strong>void vmalloc(unsigned long size)</strong></p>
+<p>超过128KB的内存显然不能使用slab分配，并且当申请的连续内存大小不能在buddy系统中得到满足，那么<br>就需要使用vmalloc。vmalloc为了把物理的非连续页一个个映射，从而导致比直接内存映射大的多的<br>后援缓冲区抖动。除非需要特别大的内存，否则尽量不要使用vmalloc。</p>
+<h2 id="基于DMA-分配"><a href="#基于DMA-分配" class="headerlink" title="基于DMA 分配"></a>基于DMA 分配</h2><p><strong>void  dma_alloc_coherent(struct device dev, size_t size, dma_addr_t handle, gfp_t gfp)</strong></p>
+<p>在某些arch中，可以使用dma_alloc_coherent来分配DMA专用内存。列入在arch/arm/mm/consistent.c<br>中，该函数先分配最小可满足size的2^order内存，然后释放2^order-size多余的页给buddy。而arch/i386/<br>kernel/pci-dma.c中，则直接分配2^order块内存。</p>
+<h2 id="直接映射分配"><a href="#直接映射分配" class="headerlink" title="直接映射分配"></a>直接映射分配</h2><p><strong>ioremap(unsigned long phys_addr, size_t size)</strong><br><strong>int remap_pfn_range(struct vm_area_struct vma, unsigned long addr,</strong><br><strong>                    unsigned long pfn, unsigned long size, pgprot_t prot)</strong></p>
+<p>在某些体系结构中，我们可以保留memory map段上的某一个区域，作为dma或其他设备的专有内存。<br>这段内存并不在kernel buddy的控制之下（没有被放入mem_maps），你也无法从以上几种分配方式中得到<br>这些内存。这个时候，你可以用ioremap和remap_pfn_range将这段内存直接映射到vm上。</p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2007/04/08/Kernel-Memory-Allocation/" class="archive-article-date">
+  	<time datetime="2007-04-08T05:00:00.000Z" itemprop="datePublished"><i class="icon-clock"></i>2007-04-08</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Cache/">Cache</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Kernel/">Kernel</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux/">Linux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Memory/">Memory</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/buddy/">buddy</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+  
+<nav id="article-nav">
+  
+    <a href="/2007/11/14/Hrtimer-Clockevent-Timekeeping/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          Linux Kernel Timekeeping
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2007/01/07/Thread-In-Kernel/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Thread supported in Kernel</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+
+
+<div class="share_jia">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">Share to: &nbsp; </span>
+		<a class="jiathis_button_facebook"></a> 
+	    <a class="jiathis_button_twitter"></a>
+	    <a class="jiathis_button_plus"></a> 
+	    <a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	</div>
+	<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
+
+
+
+
+
+
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="Kernel-Memory-Allocation" data-title="Kernel中的内存分配方式" data-url="http://muddog.github.io/2007/04/08/Kernel-Memory-Allocation/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"muddog"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
+
+
+
+
+
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+    	<div class="footer-left">
+    		&copy; 2016 豆芽
+    	</div>
+      	<div class="footer-right">
+      		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
+      	</div>
+    </div>
+  </div>
+</footer>
+    </div>
+    <script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: false,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false,
+		root: "/",
+		innerArchive: true
+	}
+</script>
+
+<script src="/./main.js"></script>
+
+
+    
+<div class="tools-col">
+  <ul class="btn-wrap">
+    
+      <li class="chose" data-hook="tools-section-all"><span class="text">全部</span><i class="icon-book"></i></li>
+    
+    
+      <li data-hook="tools-section-tag"><span class="text">标签</span><i class="icon-price-tags"></i></li>
+    
+    
+    
+      <li data-hook="tools-section-me"><span class="text">我</span><i class="icon-smile"></i></li>
+    
+  </ul>
+  <div class="tools-wrap">
+    
+    	<section class="tools-section tools-section-all chose">
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-tag">
+    			<div class="widget tagcloud" id="js-tagcloud">
+    				<a href="/tags/Blocking/" style="font-size: 10px;">Blocking</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/Clocksource/" style="font-size: 10px;">Clocksource</a> <a href="/tags/DTLS/" style="font-size: 10px;">DTLS</a> <a href="/tags/Embeded/" style="font-size: 10px;">Embeded</a> <a href="/tags/FTP/" style="font-size: 10px;">FTP</a> <a href="/tags/Family/" style="font-size: 10px;">Family</a> <a href="/tags/HRTimer/" style="font-size: 10px;">HRTimer</a> <a href="/tags/Hangzhou/" style="font-size: 10px;">Hangzhou</a> <a href="/tags/IoT/" style="font-size: 13.33px;">IoT</a> <a href="/tags/Kernel/" style="font-size: 16.67px;">Kernel</a> <a href="/tags/Linux/" style="font-size: 20px;">Linux</a> <a href="/tags/Memory/" style="font-size: 10px;">Memory</a> <a href="/tags/Netfilter/" style="font-size: 13.33px;">Netfilter</a> <a href="/tags/Photography/" style="font-size: 10px;">Photography</a> <a href="/tags/RTOS/" style="font-size: 13.33px;">RTOS</a> <a href="/tags/TCP/" style="font-size: 10px;">TCP</a> <a href="/tags/Thread/" style="font-size: 13.33px;">Thread</a> <a href="/tags/Timekeeping/" style="font-size: 10px;">Timekeeping</a> <a href="/tags/buddy/" style="font-size: 10px;">buddy</a> <a href="/tags/handshake/" style="font-size: 10px;">handshake</a> <a href="/tags/mbed/" style="font-size: 10px;">mbed</a> <a href="/tags/mbedOS/" style="font-size: 10px;">mbedOS</a> <a href="/tags/mbedTLS/" style="font-size: 10px;">mbedTLS</a>
+    			</div>
+    	</section>
+    
+
+    
+
+    
+    	<section class="tools-section tools-section-me">
+  	  	
+  	  		<div class="aboutme-wrap" id="js-aboutme">土狗一只&lt;br&gt;&lt;br&gt;码农&lt;br&gt;嵌入式</div>
+  	  	
+    	</section>
+    
+  </div>
+  
+</div>
+    <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+  </div>
+</body>
+</html>

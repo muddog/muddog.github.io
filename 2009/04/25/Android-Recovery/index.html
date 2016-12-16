@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" >
+  <link rel="dns-prefetch" href="http://muddog.github.io">
+  <title>Android Recovery模式 | MudDog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="Recovery简介Android利用Recovery模式，进行恢复出厂设置，OTA升级，patch升级及firmware升级。升级一般通过运行升级包中的META-INF/com/google/android/update-script脚本来执行自定义升级，脚本中是一组recovery系统能识别的UI控制，文件系统操作命令，例如write_raw_image（写FLASH分区），copy_dir（">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android Recovery模式">
+<meta property="og:url" content="http://muddog.github.io/2009/04/25/Android-Recovery/index.html">
+<meta property="og:site_name" content="MudDog">
+<meta property="og:description" content="Recovery简介Android利用Recovery模式，进行恢复出厂设置，OTA升级，patch升级及firmware升级。升级一般通过运行升级包中的META-INF/com/google/android/update-script脚本来执行自定义升级，脚本中是一组recovery系统能识别的UI控制，文件系统操作命令，例如write_raw_image（写FLASH分区），copy_dir（">
+<meta property="og:image" content="http://muddog.github.io/Android-Recovery/flow1.png">
+<meta property="og:image" content="http://muddog.github.io/Android-Recovery/flow2.png">
+<meta property="og:image" content="http://muddog.github.io/Android-Recovery/flow3.png">
+<meta property="og:updated_time" content="2016-12-16T13:43:53.287Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android Recovery模式">
+<meta name="twitter:description" content="Recovery简介Android利用Recovery模式，进行恢复出厂设置，OTA升级，patch升级及firmware升级。升级一般通过运行升级包中的META-INF/com/google/android/update-script脚本来执行自定义升级，脚本中是一组recovery系统能识别的UI控制，文件系统操作命令，例如write_raw_image（写FLASH分区），copy_dir（">
+<meta name="twitter:image" content="http://muddog.github.io/Android-Recovery/flow1.png">
+  
+    <link rel="alternative" href="/atom.xml" title="MudDog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link rel="stylesheet" href="/main.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div class="left-col">
+      <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			<img src="/avatar.png" class="js-avatar">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">豆芽</a></h1>
+		</hgroup>
+
+		
+
+		<nav class="header-menu">
+			<ul>
+			
+				<li><a href="/">Home</a></li>
+	        
+				<li><a href="/tags/IoT">IoT</a></li>
+	        
+				<li><a href="/tags/embeded">Embeded</a></li>
+	        
+				<li><a href="/tags/photo">Photograph</a></li>
+	        
+			</ul>
+		</nav>
+		<nav class="header-smart-menu">
+	        
+    		
+    			
+    			<a class="js-smart-menu" data-idx="0" href="javascript:void(0)">所有文章</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="1" href="javascript:void(0)">标签</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="2" href="javascript:void(0)">关于我</a>
+    			
+    			
+            
+		</nav>
+		<nav class="header-nav">
+			<div class="social">
+				
+					<a class="github" target="_blank" href="https://github.com/muddog" title="github">github</a>
+		        
+					<a class="weibo" target="_blank" href="http://weibo.com/muddogxp/" title="weibo">weibo</a>
+		        
+					<a class="zhihu" target="_blank" href="https://www.zhihu.com/people/muddog" title="zhihu">zhihu</a>
+		        
+					<a class="linkedin" target="_blank" href="http://www.linkedin.com/in/xinyu-chen-eric" title="linkedin">linkedin</a>
+		        
+			</div>
+		</nav>
+	</header>		
+</div>
+
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"><i class="icon-list"></i></div>
+  		<h1 class="header-author js-mobile-header hide">豆芽</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				
+					<img src="/avatar.png" class="js-avatar">
+				
+			</div>
+			<hgroup>
+			  <h1 class="header-author">豆芽</h1>
+			</hgroup>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">Home</a></li>
+		        
+					<li><a href="/tags/IoT">IoT</a></li>
+		        
+					<li><a href="/tags/embeded">Embeded</a></li>
+		        
+					<li><a href="/tags/photo">Photograph</a></li>
+		        
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+						<a class="github" target="_blank" href="https://github.com/muddog" title="github">github</a>
+			        
+						<a class="weibo" target="_blank" href="http://weibo.com/muddogxp/" title="weibo">weibo</a>
+			        
+						<a class="zhihu" target="_blank" href="https://www.zhihu.com/people/muddog" title="zhihu">zhihu</a>
+			        
+						<a class="linkedin" target="_blank" href="http://www.linkedin.com/in/xinyu-chen-eric" title="linkedin">linkedin</a>
+			        
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+
+      <div class="body-wrap">
+        <article id="post-Android-Recovery" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Android Recovery模式
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="Recovery简介"><a href="#Recovery简介" class="headerlink" title="Recovery简介"></a>Recovery简介</h2><p>Android利用Recovery模式，进行恢复出厂设置，OTA升级，patch升级及firmware升级。升级一般通过运行升级包中的META-INF/com/google/android/update-script脚本来执行自定义升级，脚本中是一组recovery系统能识别的UI控制，文件系统操作命令，例如write_raw_image（写FLASH分区），copy_dir（复制目录）。该包一般被下载至SDCARD和CACHE分区下。如果对该包内容感兴趣，可以从<a href="http://forum.xda-developers.com/showthread.php?t=442480" target="_blank" rel="external">http://forum.xda-developers.com/showthread.php?t=442480</a> 下载JF升级包来看看。升级中还涉及到包的数字签名，签名方式和普通JAR文件签名差不错。公钥会被硬编译入recovery，编译时生成在：out/target/product/XX/obj/PACKAGING/ota_keys_inc_intermediates/keys.inc</p>
+<h3 id="G1中的三种启动模式"><a href="#G1中的三种启动模式" class="headerlink" title="G1中的三种启动模式"></a>G1中的三种启动模式</h3><p>MAGIC KEY:</p>
+<ol>
+<li>camera + power：bootloader模式，ADP里则可以使用fastboot模式</li>
+<li>home + power：recovery模式</li>
+<li>正常启动, Bootloader正常启动，又有三种方式，按照BCB（Bootloader Control Block, 下节介绍）中的command分类：<ul>
+<li>command == ‘boot-recovery’ → 启动recovery.img。recovery模式</li>
+<li>command == ‘update-radio/hboot’ → 更新firmware（bootloader)</li>
+</ul>
+</li>
+<li>其他 → 启动boot.img</li>
+</ol>
+<a id="more"></a>
+<h3 id="Recovery涉及到的其他系统及文件"><a href="#Recovery涉及到的其他系统及文件" class="headerlink" title="Recovery涉及到的其他系统及文件"></a>Recovery涉及到的其他系统及文件</h3><p><strong>CACHE分区文件</strong></p>
+<p>Recovery 工具通过NAND cache分区上的三个文件和主系统打交道。主系统（包括恢复出厂设置和OTA升级）可以写入recovery所需的命令，读出recovery过程中的LOG和intent。</p>
+<ul>
+<li><p>/cache/recovery/command： recovery命令，由主系统写入。所有命令如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">--send_intent=anystring - write the text out to recovery.intent</div><div class="line">--update_package=root:path - verify install an OTA package file</div><div class="line">--wipe_data - erase user data (and cache), <span class="keyword">then</span> reboot</div><div class="line">--wipe_cache - wipe cache (but not user data), <span class="keyword">then</span> reboot</div></pre></td></tr></table></figure>
+</li>
+<li><p>/cache/recovery/log：recovery过程日志，由主系统读出</p>
+</li>
+<li>/cache/recovery/intent：recovery输出的intent</li>
+</ul>
+<p><strong>MISC分区内容</strong></p>
+<p>Bootloader Control Block (BCB) 存放recovery bootloader message。结构如下：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">struct</span> bootloader_message &#123;</div><div class="line">	<span class="keyword">char</span> command[<span class="number">32</span>];</div><div class="line">	<span class="keyword">char</span> status[<span class="number">32</span>]; <span class="comment">// 未知用途</span></div><div class="line">	<span class="keyword">char</span> recovery[<span class="number">1024</span>];</div><div class="line">&#125;;</div></pre></td></tr></table></figure></p>
+<p>command可以有以下两个值</p>
+<ol>
+<li>“boot-recovery”：标示recovery正在进行，或指示bootloader应该进入recovery mode</li>
+<li>“update-hboot/radio”：指示bootloader更新firmware</li>
+</ol>
+<p>recovery内容<br>“recovery\n<br>\n<br>”<br>其中recovery command为CACHE:/recovery/command命令</p>
+<h3 id="两种Recovery-Case"><a href="#两种Recovery-Case" class="headerlink" title="两种Recovery Case"></a>两种Recovery Case</h3><p><strong>FACTORY RESET（恢复出厂设置）</strong></p>
+<ol>
+<li>用户选择“恢复出厂设置”</li>
+<li>设置系统将”–wipe_data”命令写入/cache/recovery/command</li>
+<li>系统重启，并进入recover模式（/sbin/recovery）</li>
+<li>get_args() 将 “boot-recovery”和”–wipe_data”写入BCB</li>
+<li>erase_root() 格式化（擦除）DATA分区</li>
+<li>erase_root() 格式化（擦除）CACHE分区</li>
+<li>finish_recovery() 擦除BCB</li>
+<li>重启系统</li>
+</ol>
+<p><strong>OTA INSTALL（OTA升级）</strong></p>
+<ol>
+<li>升级系统下载 OTA包到/cache/some-filename.zip</li>
+<li>升级系统写入recovery命令”–update_package=CACHE:some-filename.zip”</li>
+<li>重启，并进入recovery模式</li>
+<li>get_args() 将”boot-recovery” 和 “–update_package=…” 写入BCB</li>
+<li>install_package() 作升级</li>
+<li>finish_recovery() 擦除 BCB</li>
+<li>如果安装包失败 prompt_and_wait() 等待用户操作，选择ALT+S或ALT+W 升级或恢复出厂设置</li>
+<li>main() 调用 maybe_install_firmware_update()<br>1) 如果包里有hboot/radio的firmware则继续，否则返回<br>2) 将 “boot-recovery” 和 “–wipe_cache” 写入BCB<br>3) 将 firmware image写入cache分区<br>4) 将 “update-radio/hboot” 和 “–wipe_cache” 写入BCB<br>5) 重启系统<br>6) bootloader自身更新firmware<br>7) bootloader 将 “boot-recovery” 写入BCB<br>8) erase_root() 擦除CACHE分区<br>9) 清除 BCB</li>
+<li>main() 调用 reboot() 重启系统</li>
+</ol>
+<h3 id="Recovery模式流程"><a href="#Recovery模式流程" class="headerlink" title="Recovery模式流程"></a>Recovery模式流程</h3><p>/init → init.rc → /sbin/recovery →<br>main():recovery.c</p>
+<ul>
+<li>ui_init():ui.c ［UI initialize］</li>
+<li>gr_init():minui/graphics.c ［set tty0 to graphic mode, open fb0]</li>
+<li>ev_init():minui/events.c [open /dev/input/event*]</li>
+<li>res_create_surface:minui/resource.c [create surfaces for all bitmaps used later, include icons, bmps]</li>
+<li>create 2 threads: progress/input_thread [create progress show and input event handler thread]</li>
+<li>get_args():recovery.c</li>
+<li>get_bootloader_message():bootloader.c [read mtdblock0(misc partition) 2nd page for commandline]</li>
+<li>check if nand misc partition has boot message. If yes, fill argc/argv.</li>
+<li>If no, get arguments from /cache/recovery/command, and fill argc/argv.</li>
+<li>set_bootloader_message():bootloader.c [set bootloader message back to mtdblock0]</li>
+<li>Parser argv[] filled above</li>
+<li>register_update_commands():commands.c [ register all commands with name and hook function ]</li>
+<li>registerCommand():commands.c</li>
+<li>Register command with name, hook, type, cookie.</li>
+<li>Commands, e.g: assert, delete, copy_dir, symlink, write_raw_image.</li>
+<li>registerFunction():commands.c</li>
+<li>Register function with name, hook, cookie.</li>
+<li>Function, e.g: get_mark, matches, getprop, file_contains</li>
+<li>install_package():</li>
+<li>translate_root_path():roots.c [ “SYSTEM:lib” and turns it into a string like “/system/lib”, translate the updater.zip path ]</li>
+<li>mzOpenZipArchive():zip.c [ open updater.zip file (uncompass) ]</li>
+<li>handle_update_package():install.c</li>
+<li>verify_jar_signature():verifier.c [ verify signature with keys.inc key; verify manifest and zip package archive ]</li>
+<li>verifySignature() [ verify the signature file: CERT.sf/rsa. ]</li>
+<li>digestEntry():verifier.c [ get SHA-1 digest of CERT.sf file ]</li>
+<li>RSA_verify(public key:keys.inc, signature:CERT.rsa, CERT.sf’s digest):libc/rsa.c [ Verify a 2048 bit RSA PKCS1.5 signature against an expected SHA-1 hash. Use public key to decrypt the CERT.rsa to get original SHA digest, then compare to digest of CERT.sf ]</li>
+<li>verifyManifest() [ Get manifest SHA1-Digest from CERT.sf. Then do digest to MANIFEST.MF. Compare them ]</li>
+<li>verifyArchive() [ verify all the files in update.zip with digest listed in MANIFEST.MF ]</li>
+<li>find_update_script():install.c [ find META-INF/com/google/android/update-script updater script ]</li>
+<li>handle_update_script():install.c [ read cmds from script file, and do parser, exec ]</li>
+<li>parseAmendScript():amend.c [ call yyparse() to parse to command ]</li>
+<li>exeCommandList():install.c</li>
+<li>exeCommand():execute.c [ call command hook function ]</li>
+<li>erase DATA/CACHE partition</li>
+<li>prompt_and_wait():recovery.c [ wait for user input: 1) reboot 2) update.zip 3) wipe data ]</li>
+<li>ui_key_xxx get ALT+x keys</li>
+<li>1) do nothing</li>
+<li>2) install_package(‘SDCARD:update.zip’)</li>
+<li>3) erase_root() → format_root_device() DATA/CACHE</li>
+<li>may_install_firmware_update():firmware.c [ remember_firmware_update() is called by write_hboot/radio_image command, it stores the bootloader image to CACHE partition, and write update-hboot/radio command to MISC partition for bootloader message to let bootloader update itself after reboot ]</li>
+<li>set_bootloader_message()</li>
+<li>write_update_for_bootloader():bootloader.c [ write firmware image into CACHE partition with update_header, busyimage and failimage ]</li>
+<li>finish_recovery():recovery.c [ clear the recovery command and prepare to boot a (hopefully working) system, copy our log file to cache as well (for the system to read), and record any intent we were asked to communicate back to the system. ]</li>
+<li>reboot()</li>
+</ul>
+<h3 id="Recovery模式流程图"><a href="#Recovery模式流程图" class="headerlink" title="Recovery模式流程图"></a>Recovery模式流程图</h3><p>以下流程图绘制了系统从启动加载bootloader后的行为流程。<br><img src="/Android-Recovery/flow1.png" alt=""><br><img src="/Android-Recovery/flow2.png" alt=""><br><img src="/Android-Recovery/flow3.png" alt=""></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2009/04/25/Android-Recovery/" class="archive-article-date">
+  	<time datetime="2009-04-25T05:00:00.000Z" itemprop="datePublished"><i class="icon-clock"></i>2009-04-25</time>
+</a>
+      
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+  
+<nav id="article-nav">
+  
+    <a href="/2016/11/12/IoT-RTOS/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          IoT的那些操作系统
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2007/11/14/Hrtimer-Clockevent-Timekeeping/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Linux Kernel Timekeeping</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+
+
+<div class="share_jia">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">Share to: &nbsp; </span>
+		<a class="jiathis_button_facebook"></a> 
+	    <a class="jiathis_button_twitter"></a>
+	    <a class="jiathis_button_plus"></a> 
+	    <a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	</div>
+	<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
+
+
+
+
+
+
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="Android-Recovery" data-title="Android Recovery模式" data-url="http://muddog.github.io/2009/04/25/Android-Recovery/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"muddog"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
+
+
+
+
+
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+    	<div class="footer-left">
+    		&copy; 2016 豆芽
+    	</div>
+      	<div class="footer-right">
+      		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
+      	</div>
+    </div>
+  </div>
+</footer>
+    </div>
+    <script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: false,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false,
+		root: "/",
+		innerArchive: true
+	}
+</script>
+
+<script src="/./main.js"></script>
+
+
+    
+<div class="tools-col">
+  <ul class="btn-wrap">
+    
+      <li class="chose" data-hook="tools-section-all"><span class="text">全部</span><i class="icon-book"></i></li>
+    
+    
+      <li data-hook="tools-section-tag"><span class="text">标签</span><i class="icon-price-tags"></i></li>
+    
+    
+    
+      <li data-hook="tools-section-me"><span class="text">我</span><i class="icon-smile"></i></li>
+    
+  </ul>
+  <div class="tools-wrap">
+    
+    	<section class="tools-section tools-section-all chose">
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-tag">
+    			<div class="widget tagcloud" id="js-tagcloud">
+    				<a href="/tags/Blocking/" style="font-size: 10px;">Blocking</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/Clocksource/" style="font-size: 10px;">Clocksource</a> <a href="/tags/DTLS/" style="font-size: 10px;">DTLS</a> <a href="/tags/Embeded/" style="font-size: 10px;">Embeded</a> <a href="/tags/FTP/" style="font-size: 10px;">FTP</a> <a href="/tags/Family/" style="font-size: 10px;">Family</a> <a href="/tags/HRTimer/" style="font-size: 10px;">HRTimer</a> <a href="/tags/Hangzhou/" style="font-size: 10px;">Hangzhou</a> <a href="/tags/IoT/" style="font-size: 13.33px;">IoT</a> <a href="/tags/Kernel/" style="font-size: 16.67px;">Kernel</a> <a href="/tags/Linux/" style="font-size: 20px;">Linux</a> <a href="/tags/Memory/" style="font-size: 10px;">Memory</a> <a href="/tags/Netfilter/" style="font-size: 13.33px;">Netfilter</a> <a href="/tags/Photography/" style="font-size: 10px;">Photography</a> <a href="/tags/RTOS/" style="font-size: 13.33px;">RTOS</a> <a href="/tags/TCP/" style="font-size: 10px;">TCP</a> <a href="/tags/Thread/" style="font-size: 13.33px;">Thread</a> <a href="/tags/Timekeeping/" style="font-size: 10px;">Timekeeping</a> <a href="/tags/buddy/" style="font-size: 10px;">buddy</a> <a href="/tags/handshake/" style="font-size: 10px;">handshake</a> <a href="/tags/mbed/" style="font-size: 10px;">mbed</a> <a href="/tags/mbedOS/" style="font-size: 10px;">mbedOS</a> <a href="/tags/mbedTLS/" style="font-size: 10px;">mbedTLS</a>
+    			</div>
+    	</section>
+    
+
+    
+
+    
+    	<section class="tools-section tools-section-me">
+  	  	
+  	  		<div class="aboutme-wrap" id="js-aboutme">土狗一只&lt;br&gt;&lt;br&gt;码农&lt;br&gt;嵌入式</div>
+  	  	
+    	</section>
+    
+  </div>
+  
+</div>
+    <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+  </div>
+</body>
+</html>

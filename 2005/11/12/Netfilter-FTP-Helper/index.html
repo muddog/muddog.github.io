@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" >
+  <link rel="dns-prefetch" href="http://muddog.github.io">
+  <title>Netfilter FTP Helper源码分析 | MudDog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="由于nat表需要ip conntrack模块支持，因此在针对FTP数据连接的nat动作也需要conntrack支持。主要流程如下：
+netfilter hook将FTP控制连接加入到conntrack pool中，每一个在该conntrack上的数据报会被送至help函数（ip_conntrack_ftp.c），该函数由ip_conntrack_helper_unregister()注册成为该co">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Netfilter FTP Helper源码分析">
+<meta property="og:url" content="http://muddog.github.io/2005/11/12/Netfilter-FTP-Helper/index.html">
+<meta property="og:site_name" content="MudDog">
+<meta property="og:description" content="由于nat表需要ip conntrack模块支持，因此在针对FTP数据连接的nat动作也需要conntrack支持。主要流程如下：
+netfilter hook将FTP控制连接加入到conntrack pool中，每一个在该conntrack上的数据报会被送至help函数（ip_conntrack_ftp.c），该函数由ip_conntrack_helper_unregister()注册成为该co">
+<meta property="og:updated_time" content="2016-12-16T13:43:53.286Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Netfilter FTP Helper源码分析">
+<meta name="twitter:description" content="由于nat表需要ip conntrack模块支持，因此在针对FTP数据连接的nat动作也需要conntrack支持。主要流程如下：
+netfilter hook将FTP控制连接加入到conntrack pool中，每一个在该conntrack上的数据报会被送至help函数（ip_conntrack_ftp.c），该函数由ip_conntrack_helper_unregister()注册成为该co">
+  
+    <link rel="alternative" href="/atom.xml" title="MudDog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link rel="stylesheet" href="/main.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div class="left-col">
+      <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			<img src="/avatar.png" class="js-avatar">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">豆芽</a></h1>
+		</hgroup>
+
+		
+
+		<nav class="header-menu">
+			<ul>
+			
+				<li><a href="/">Home</a></li>
+	        
+				<li><a href="/tags/IoT">IoT</a></li>
+	        
+				<li><a href="/tags/embeded">Embeded</a></li>
+	        
+				<li><a href="/tags/photo">Photograph</a></li>
+	        
+			</ul>
+		</nav>
+		<nav class="header-smart-menu">
+	        
+    		
+    			
+    			<a class="js-smart-menu" data-idx="0" href="javascript:void(0)">所有文章</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="1" href="javascript:void(0)">标签</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="2" href="javascript:void(0)">关于我</a>
+    			
+    			
+            
+		</nav>
+		<nav class="header-nav">
+			<div class="social">
+				
+					<a class="github" target="_blank" href="https://github.com/muddog" title="github">github</a>
+		        
+					<a class="weibo" target="_blank" href="http://weibo.com/muddogxp/" title="weibo">weibo</a>
+		        
+					<a class="zhihu" target="_blank" href="https://www.zhihu.com/people/muddog" title="zhihu">zhihu</a>
+		        
+					<a class="linkedin" target="_blank" href="http://www.linkedin.com/in/xinyu-chen-eric" title="linkedin">linkedin</a>
+		        
+			</div>
+		</nav>
+	</header>		
+</div>
+
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"><i class="icon-list"></i></div>
+  		<h1 class="header-author js-mobile-header hide">豆芽</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				
+					<img src="/avatar.png" class="js-avatar">
+				
+			</div>
+			<hgroup>
+			  <h1 class="header-author">豆芽</h1>
+			</hgroup>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">Home</a></li>
+		        
+					<li><a href="/tags/IoT">IoT</a></li>
+		        
+					<li><a href="/tags/embeded">Embeded</a></li>
+		        
+					<li><a href="/tags/photo">Photograph</a></li>
+		        
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+						<a class="github" target="_blank" href="https://github.com/muddog" title="github">github</a>
+			        
+						<a class="weibo" target="_blank" href="http://weibo.com/muddogxp/" title="weibo">weibo</a>
+			        
+						<a class="zhihu" target="_blank" href="https://www.zhihu.com/people/muddog" title="zhihu">zhihu</a>
+			        
+						<a class="linkedin" target="_blank" href="http://www.linkedin.com/in/xinyu-chen-eric" title="linkedin">linkedin</a>
+			        
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+
+      <div class="body-wrap">
+        <article id="post-Netfilter-FTP-Helper" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Netfilter FTP Helper源码分析
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>由于nat表需要ip conntrack模块支持，因此在针对FTP数据连接的nat动作也需要conntrack支持。主要流程如下：</p>
+<p>netfilter hook将FTP控制连接加入到conntrack pool中，每一个在该conntrack上的数据报会被送至help函数（ip_conntrack_ftp.c），该函数由ip_conntrack_helper_unregister()注册成为该conntrack的helper，探测将会出现的期待连接信息，并注册入期待结构。当该helper函数注册的期待连接到达时（在这里就是FTP数据连接），该连接被注册为控制连接的RELATE conntrack。并且生成数据连接的第一个数据包，会被交给nat ftp helper 函数（ip_nat_ftp.c），该函数将该数据包payload中的地址信息（如：PORT、PASV命令中的ip地址）执行NAT。接下来该RELATE conntrack的第一个数据包会流入nat ftp expect函数（ip_nat_ftp.c）。由该函数执行NAT，执行过程和一般的NAT target差不多。</p>
+<p><strong>接下来就分析这些helper，expect函数</strong></p>
+<a id="more"></a>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div><div class="line">141</div><div class="line">142</div><div class="line">143</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="comment">// file: ip_conntrack_ftp.c</span></div><div class="line"><span class="comment">// function: help</span></div><div class="line"></div><div class="line"><span class="comment">/*  每个控制连接的数据包会传入到该函数中。该函数探测该包是否包含FTP PASV/PORT命令。如果包含这些命令，则从命令中取得期待的数据连接的信息，ip及port。然后将该信息填入tuple/mask，注册到该conntrack期待的连接结构中。*/</span></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">help</span><span class="params">(<span class="keyword">const</span> <span class="keyword">struct</span> iphdr *iph, <span class="keyword">size_t</span> len,</span></span></div><div class="line">              <span class="keyword">struct</span> ip_conntrack *ct,             <span class="comment">/* 当前控制连接conntrack结构 */</span></div><div class="line">              <span class="keyword">enum</span> ip_conntrack_info ctinfo)  <span class="comment">/* 控制连接状态信息 */</span></div><div class="line">&#123;</div><div class="line">       <span class="keyword">struct</span> tcphdr *tcph = (<span class="keyword">void</span> *)iph + iph-&gt;ihl * <span class="number">4</span>;</div><div class="line">       <span class="keyword">const</span> <span class="keyword">char</span> *data = (<span class="keyword">const</span> <span class="keyword">char</span> *)tcph + tcph-&gt;doff * <span class="number">4</span>;</div><div class="line">       <span class="keyword">unsigned</span> <span class="keyword">int</span> tcplen = len – iph-&gt;ihl * <span class="number">4</span>;</div><div class="line">       <span class="keyword">unsigned</span> <span class="keyword">int</span> datalen = tcplen – tcph-&gt;doff * <span class="number">4</span>;</div><div class="line">       <span class="keyword">u_int32_t</span> old_seq_aft_nl;</div><div class="line">       <span class="keyword">int</span> old_seq_aft_nl_set;</div><div class="line">       <span class="keyword">u_int32_t</span> <span class="built_in">array</span>[<span class="number">6</span>] = &#123; <span class="number">0</span> &#125;;    <span class="comment">/* 存放payload及期待的ip,port */</span></div><div class="line">       <span class="keyword">int</span> dir = CTINFO2DIR(ctinfo);     <span class="comment">/* ORIGIAN or REPLY */</span></div><div class="line">       <span class="keyword">unsigned</span> <span class="keyword">int</span> matchlen, matchoff;</div><div class="line">       <span class="keyword">struct</span> ip_ct_ftp_master *ct_ftp_info = &amp;ct-&gt;help.ct_ftp_info; <span class="comment">/* 下一个期待的sequence */</span></div><div class="line">        <span class="comment">/*    声明一个ip_conntrack_expect期待结构，该结构稍后会被复制到内核kmalloc分配的空间里。该help函数的一个主要目的是，将获取的信息填充该结构，并把这个结构放入控制连接的conntrack中  */</span></div><div class="line">       <span class="keyword">struct</span> ip_conntrack_expect expect, *<span class="built_in">exp</span> = &amp;expect;</div><div class="line">       <span class="keyword">struct</span> ip_ct_ftp_expect *exp_ftp_info = &amp;<span class="built_in">exp</span>-&gt;help.exp_ftp_info;</div><div class="line">       <span class="keyword">unsigned</span> <span class="keyword">int</span> i;</div><div class="line"></div><div class="line">       <span class="keyword">int</span> found = <span class="number">0</span>;</div><div class="line"></div><div class="line">       <span class="comment">/* FTP的PORT/PASV都应该在ESTABLESHED状态下出现 */</span></div><div class="line"></div><div class="line">       <span class="keyword">if</span> (ctinfo != IP_CT_ESTABLISHED</div><div class="line">           &amp;&amp; ctinfo != IP_CT_ESTABLISHED+IP_CT_IS_REPLY) &#123;</div><div class="line">              <span class="keyword">return</span> NF_ACCEPT;</div><div class="line">       &#125;</div><div class="line"></div><div class="line">       <span class="comment">/* 检查TCP包头的完整性 */</span></div><div class="line">       <span class="keyword">if</span> (tcplen &lt; <span class="keyword">sizeof</span>(<span class="keyword">struct</span> tcphdr) || tcplen &lt; tcph-&gt;doff*<span class="number">4</span>) &#123;</div><div class="line">              <span class="keyword">return</span> NF_ACCEPT;</div><div class="line">       &#125;</div><div class="line"></div><div class="line">       <span class="comment">/* 检查tcp校验和 */</span></div><div class="line">       <span class="keyword">if</span> (tcp_v4_check(tcph, tcplen, iph-&gt;saddr, iph-&gt;daddr,</div><div class="line">                      csum_partial((<span class="keyword">char</span> *)tcph, tcplen, <span class="number">0</span>))) &#123;</div><div class="line">              <span class="keyword">return</span> NF_ACCEPT;</div><div class="line">       &#125;</div><div class="line"></div><div class="line">       LOCK_BH(&amp;ip_ftp_lock);</div><div class="line"></div><div class="line">       <span class="comment">/* 获取期待的sequence */</span></div><div class="line">       old_seq_aft_nl_set = ct_ftp_info-&gt;seq_aft_nl_set[dir];</div><div class="line">       old_seq_aft_nl = ct_ftp_info-&gt;seq_aft_nl[dir];</div><div class="line"></div><div class="line">       <span class="keyword">if</span> ((datalen &gt; <span class="number">0</span>) &amp;&amp; (data[datalen<span class="number">-1</span>] == ‘\n’)) &#123;</div><div class="line">              <span class="keyword">if</span> (!old_seq_aft_nl_set || after(ntohl(tcph-&gt;seq) + datalen, old_seq_aft_nl)) &#123;</div><div class="line">                     <span class="comment">/* 更新期望的下一个seqence */</span></div><div class="line">                     ct_ftp_info-&gt;seq_aft_nl[dir] = ntohl(tcph-&gt;seq) + datalen;</div><div class="line">                     ct_ftp_info-&gt;seq_aft_nl_set[dir] = <span class="number">1</span>;</div><div class="line">              &#125;</div><div class="line">       &#125;</div><div class="line"></div><div class="line">       UNLOCK_BH(&amp;ip_ftp_lock);</div><div class="line"></div><div class="line">       <span class="keyword">if</span>(!old_seq_aft_nl_set || (ntohl(tcph-&gt;seq) != old_seq_aft_nl)) &#123;</div><div class="line">              <span class="comment">/* 该数据包并不是期待的那个，直接ACCEPT */</span></div><div class="line">              <span class="keyword">return</span> NF_ACCEPT;</div><div class="line">       &#125;</div><div class="line">       <span class="comment">/*  将该conntrack中tuple结构原地址取出，然后传递给find_pattern()，比较匹配。*/</span></div><div class="line">       <span class="built_in">array</span>[<span class="number">0</span>] = (ntohl(ct-&gt;tuplehash[dir].tuple.src.ip) &gt;&gt; <span class="number">24</span>) &amp; <span class="number">0xFF</span>;</div><div class="line">       <span class="built_in">array</span>[<span class="number">1</span>] = (ntohl(ct-&gt;tuplehash[dir].tuple.src.ip) &gt;&gt; <span class="number">16</span>) &amp; <span class="number">0xFF</span>;</div><div class="line">       <span class="built_in">array</span>[<span class="number">2</span>] = (ntohl(ct-&gt;tuplehash[dir].tuple.src.ip) &gt;&gt; <span class="number">8</span>) &amp; <span class="number">0xFF</span>;</div><div class="line">       <span class="built_in">array</span>[<span class="number">3</span>] = ntohl(ct-&gt;tuplehash[dir].tuple.src.ip) &amp; <span class="number">0xFF</span>;</div><div class="line"></div><div class="line">       <span class="comment">/*    开始遍历search结构。该结构包含一下信息:</span></div><div class="line">              enum ip_conntrack_dir dir;     数据流方向</div><div class="line">              const char *pattern;    匹配字符串</div><div class="line">              size_t plen;           匹配长度</div><div class="line">              char skip;             命令与参数之间需跳过的的字符</div><div class="line">              char term;            分割符，如‘，’ip , port</div><div class="line">              enum ip_ct_ftp_type ftptype;     FTP传输类型（PORT/PASV）</div><div class="line">              int (*getnum)(const char *, size_t, u_int32_t[], char); 匹配函数</div><div class="line">       */</div><div class="line"></div><div class="line">       <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; <span class="keyword">sizeof</span>(search) / <span class="keyword">sizeof</span>(search[<span class="number">0</span>]); i++) &#123;</div><div class="line">              <span class="keyword">if</span> (search[i].dir != dir) <span class="keyword">continue</span>;</div><div class="line">              <span class="comment">/*************************************</span></div><div class="line">              *     匹配 “PORT” 或“227”（PASV的回应，</div><div class="line">              *     包含server被动打开的port）</div><div class="line">              *     find_pattern返回匹配的数据包中的 ip地址port信息</div><div class="line">              *     存放在arrary数组中。同时返回匹配长度和偏移量。</div><div class="line">              */</div><div class="line">              found = find_pattern(data, datalen, search[i].pattern,</div><div class="line">                                 search[i].plen, search[i].skip,</div><div class="line">                                 search[i].term, &amp;matchoff, &amp;matchlen,</div><div class="line">                                 <span class="built_in">array</span>, search[i].getnum);</div><div class="line">              <span class="keyword">if</span> (found) <span class="keyword">break</span>;</div><div class="line">       &#125;</div><div class="line"></div><div class="line">       <span class="keyword">if</span> (found == <span class="number">-1</span>) &#123;</div><div class="line">             <span class="keyword">if</span> (net_ratelimit())</div><div class="line">              <span class="keyword">return</span> NF_DROP;</div><div class="line">       &#125; <span class="keyword">else</span> <span class="keyword">if</span> (found == <span class="number">0</span>) <span class="comment">/* No match */</span></div><div class="line">              <span class="keyword">return</span> NF_ACCEPT;</div><div class="line">       <span class="comment">/* 找到匹配 */</span></div><div class="line">       <span class="built_in">memset</span>(&amp;expect, <span class="number">0</span>, <span class="keyword">sizeof</span>(expect)); <span class="comment">/* 清空expect结构，准备填充 */</span></div><div class="line"></div><div class="line">       <span class="comment">/* Update the ftp info */</span></div><div class="line">       LOCK_BH(&amp;ip_ftp_lock);</div><div class="line"></div><div class="line">       <span class="keyword">if</span> (htonl((<span class="built_in">array</span>[<span class="number">0</span>] &lt;&lt; <span class="number">24</span>) | (<span class="built_in">array</span>[<span class="number">1</span>] &lt;&lt; <span class="number">16</span>) | (<span class="built_in">array</span>[<span class="number">2</span>] &lt;&lt; <span class="number">8</span>) | <span class="built_in">array</span>[<span class="number">3</span>])</div><div class="line">           == ct-&gt;tuplehash[dir].tuple.src.ip) &#123;</div><div class="line">            <span class="comment">/*    从数据包中获得的ip地址必须与tuple中源地址相同。</span></div><div class="line">                     否则ACCEPT。防止ip欺骗 */</div><div class="line">              <span class="built_in">exp</span>-&gt;seq = ntohl(tcph-&gt;seq) + matchoff;  <span class="comment">/* 期望的sequence = 匹配处*/</span></div><div class="line">              exp_ftp_info-&gt;len = matchlen;      <span class="comment">/* 匹配长度 */</span></div><div class="line">              exp_ftp_info-&gt;ftptype = search[i].ftptype; <span class="comment">/* PASV or PORT */</span></div><div class="line">              exp_ftp_info-&gt;port = <span class="built_in">array</span>[<span class="number">4</span>] &lt;&lt; <span class="number">8</span> | <span class="built_in">array</span>[<span class="number">5</span>]; <span class="comment">/* 期待的端口 */</span></div><div class="line">       &#125; <span class="keyword">else</span> &#123;</div><div class="line">             <span class="keyword">if</span> (!loose) <span class="keyword">goto</span> out;</div><div class="line">       &#125;</div><div class="line"></div><div class="line">       <span class="comment">/*    填充期待的tuple/mask。</span></div><div class="line">       *     tuple结构如下 &#123;srcip, srcport, dstip, dstport, protonum&#125;</div><div class="line">       *     mask结构一样。&#123;1, 0, 1, 1, 1&#125;</div><div class="line">       *     所以对tuple的匹配会忽略源端口。*/</div><div class="line">       <span class="built_in">exp</span>-&gt;tuple = ((<span class="keyword">struct</span> ip_conntrack_tuple)</div><div class="line">              &#123; &#123; ct-&gt;tuplehash[!dir].tuple.src.ip, <span class="comment">/* 该方向上数据包目的地址 */</span></div><div class="line">                  &#123; <span class="number">0</span> &#125; &#125;,</div><div class="line">                &#123; htonl((<span class="built_in">array</span>[<span class="number">0</span>] &lt;&lt; <span class="number">24</span>) | (<span class="built_in">array</span>[<span class="number">1</span>] &lt;&lt; <span class="number">16</span>)</div><div class="line">                       | (<span class="built_in">array</span>[<span class="number">2</span>] &lt;&lt; <span class="number">8</span>) | <span class="built_in">array</span>[<span class="number">3</span>]),</div><div class="line">                  &#123; .tcp = &#123; htons(<span class="built_in">array</span>[<span class="number">4</span>] &lt;&lt; <span class="number">8</span> | <span class="built_in">array</span>[<span class="number">5</span>]) &#125; &#125;,</div><div class="line">                  IPPROTO_TCP &#125;&#125;);</div><div class="line">       <span class="built_in">exp</span>-&gt;mask = ((<span class="keyword">struct</span> ip_conntrack_tuple)</div><div class="line">              &#123; &#123; <span class="number">0xFFFFFFFF</span>, &#123; <span class="number">0</span> &#125; &#125;,</div><div class="line">                &#123; <span class="number">0xFFFFFFFF</span>, &#123; .tcp = &#123; <span class="number">0xFFFF</span> &#125; &#125;, <span class="number">0xFFFF</span> &#125;&#125;);</div><div class="line"></div><div class="line">       <span class="built_in">exp</span>-&gt;expectfn = <span class="literal">NULL</span>;</div><div class="line">       <span class="comment">/*    注册到expect related中当该期待的连接到达时（通过对数据包的tuple/mask匹配），ip conntrack就将其加入到ct的RELATED连接中。*/</span></div><div class="line">       ip_conntrack_expect_related(ct, &amp;expect);</div><div class="line"></div><div class="line"> out:</div><div class="line">       UNLOCK_BH(&amp;ip_ftp_lock);</div><div class="line">       <span class="keyword">return</span> NF_ACCEPT;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><strong>Nat 在conntrack注册了一个期待连接信息后，调用help直接修改那个引起期待的数据包。将PORT及227(PASV回应)中的ip地址及port做NAT。</strong></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// file: ip_nat_ftp.c</span></div><div class="line"><span class="comment">// function: help</span></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="title">help</span><span class="params">(<span class="keyword">struct</span> ip_conntrack *ct,</span></span></div><div class="line">                      <span class="keyword">struct</span> ip_conntrack_expect *<span class="built_in">exp</span>,    <span class="comment">/* 由conntrack help创建的expect */</span></div><div class="line">                      <span class="keyword">struct</span> ip_nat_info *info,</div><div class="line">                      <span class="keyword">enum</span> ip_conntrack_info ctinfo,</div><div class="line">                      <span class="keyword">unsigned</span> <span class="keyword">int</span> hooknum,</div><div class="line">                      <span class="keyword">struct</span> sk_buff **pskb)</div><div class="line">&#123;</div><div class="line">       <span class="keyword">struct</span> iphdr *iph = (*pskb)-&gt;nh.iph;</div><div class="line">       <span class="keyword">struct</span> tcphdr *tcph = (<span class="keyword">void</span> *)iph + iph-&gt;ihl*<span class="number">4</span>;</div><div class="line">       <span class="keyword">unsigned</span> <span class="keyword">int</span> datalen;</div><div class="line">       <span class="keyword">int</span> dir;</div><div class="line">       <span class="keyword">struct</span> ip_ct_ftp_expect *ct_ftp_info;</div><div class="line"></div><div class="line">       <span class="keyword">if</span> (!<span class="built_in">exp</span>)  <span class="comment">/* 没有expect连接，segment error！*/</span></div><div class="line">              DEBUGP(<span class="string">"ip_nat_ftp: no exp!!"</span>);</div><div class="line"></div><div class="line">       <span class="comment">/*    ct_ftp_info 结构包括ftp的数据传输类型，数据端口</span></div><div class="line">        *     该结构再ip conntrack ftp help中创建</div><div class="line">        */</div><div class="line">       ct_ftp_info = &amp;<span class="built_in">exp</span>-&gt;help.exp_ftp_info;</div><div class="line"></div><div class="line">       <span class="comment">/* Only mangle things once: original direction in POST_ROUTING</span></div><div class="line">          and reply direction on PRE_ROUTING. */</div><div class="line">       dir = CTINFO2DIR(ctinfo);</div><div class="line"></div><div class="line">       <span class="comment">/* 只在两个情况下做help NAT */</span></div><div class="line">       <span class="keyword">if</span> (!((hooknum == NF_IP_POST_ROUTING &amp;&amp; dir == IP_CT_DIR_ORIGINAL)</div><div class="line">             || (hooknum == NF_IP_PRE_ROUTING &amp;&amp; dir == IP_CT_DIR_REPLY))) &#123;</div><div class="line">              DEBUGP(<span class="string">"nat_ftp: Not touching dir %s at hook %s\n"</span>,</div><div class="line">                     dir == IP_CT_DIR_ORIGINAL ? <span class="string">"ORIG"</span> : <span class="string">"REPLY"</span>,</div><div class="line">                     hooknum == NF_IP_POST_ROUTING ? <span class="string">"POSTROUTING"</span></div><div class="line">                     : hooknum == NF_IP_PRE_ROUTING ? <span class="string">"PREROUTING"</span></div><div class="line">                     : hooknum == NF_IP_LOCAL_OUT ? <span class="string">"OUTPUT"</span> : <span class="string">"???"</span>);</div><div class="line">              <span class="keyword">return</span> NF_ACCEPT;</div><div class="line">       &#125;</div><div class="line"></div><div class="line">       datalen = (*pskb)-&gt;len – iph-&gt;ihl * <span class="number">4</span> – tcph-&gt;doff * <span class="number">4</span>;</div><div class="line">       LOCK_BH(&amp;ip_ftp_lock);</div><div class="line"></div><div class="line">       <span class="comment">/* If it’s in the right range… */</span></div><div class="line">       <span class="keyword">if</span> (between(<span class="built_in">exp</span>-&gt;seq + ct_ftp_info-&gt;len,     <span class="comment">/* len 就是conntrack help 中的matchlen */</span></div><div class="line">                  ntohl(tcph-&gt;seq),</div><div class="line">                  ntohl(tcph-&gt;seq) + datalen)) &#123;</div><div class="line">               <span class="comment">/*    需要修改的信息在该tcp payload中</span></div><div class="line">				*     调用ftp_data_fixup修改FTP命令中的数据ip端口</div><div class="line">				*     信息。</div><div class="line">				*     ct_ftp_info结构包含：</div><div class="line">				*            1) 匹配串中ip地址长度</div><div class="line">				*            2) ftp数据传输类型</div><div class="line">				*            3) 被动打开的tcp数据端口</div><div class="line">				*     ct：当前conntrack结构，包含了conntrack的源、目的地址</div><div class="line">				*     pskb：包缓存结构</div><div class="line">				*     ctinfo：conntrack状态信息</div><div class="line">				*     exp：期待连接结构，包含期待的字符串的起始sequence值，</div><div class="line">				*            该值可以用来定位修改位置。</div><div class="line">				*/</div><div class="line"></div><div class="line">              <span class="keyword">if</span> (!ftp_data_fixup(ct_ftp_info, ct, pskb, ctinfo, <span class="built_in">exp</span>)) &#123;</div><div class="line">                     UNLOCK_BH(&amp;ip_ftp_lock);</div><div class="line">                     <span class="keyword">return</span> NF_DROP;</div><div class="line">              &#125;</div><div class="line">       &#125; <span class="keyword">else</span> &#123;</div><div class="line">              <span class="comment">/* Half a match?  This means a partial retransmisison.</span></div><div class="line">                 It’s a cracker being funky. */</div><div class="line">              <span class="keyword">if</span> (net_ratelimit()) &#123;</div><div class="line">                     printk(<span class="string">"FTP_NAT: partial packet %u/%u in %u/%u\n"</span>,</div><div class="line">                            <span class="built_in">exp</span>-&gt;seq, ct_ftp_info-&gt;len,</div><div class="line">                            ntohl(tcph-&gt;seq),</div><div class="line">                            ntohl(tcph-&gt;seq) + datalen);</div><div class="line">              &#125;</div><div class="line">              UNLOCK_BH(&amp;ip_ftp_lock);</div><div class="line">              <span class="keyword">return</span> NF_DROP;</div><div class="line">       &#125;</div><div class="line"></div><div class="line">       UNLOCK_BH(&amp;ip_ftp_lock);</div><div class="line">       <span class="keyword">return</span> NF_ACCEPT;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><strong>当第一个期待连接的数据包到来时，下面的expect函数被调用。该函数的作用和nat table中的target差不多。都是向nat core注册一个nat的ip_nat_multi_range结构。该结构就是nat所需的转换地址。</strong></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// file: ip_nat_ftp.c</span></div><div class="line"><span class="comment">// function: ftp_nat_expect</span></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">unsigned</span> <span class="keyword">int</span></span></div><div class="line"><span class="title">ftp_nat_expected</span><span class="params">(<span class="keyword">struct</span> sk_buff **pskb,</span></div><div class="line">               <span class="keyword">unsigned</span> <span class="keyword">int</span> hooknum,</div><div class="line">               <span class="keyword">struct</span> ip_conntrack *ct,</div><div class="line">               <span class="keyword">struct</span> ip_nat_info *info)</div><div class="line">&#123;</div><div class="line">       <span class="keyword">struct</span> ip_nat_multi_range mr;</div><div class="line">       <span class="keyword">u_int32_t</span> newdstip, newsrcip, newip;</div><div class="line">       <span class="keyword">struct</span> ip_ct_ftp_expect *exp_ftp_info;</div><div class="line">       <span class="keyword">struct</span> ip_conntrack *master = master_ct(ct); <span class="comment">/* 主conntrack */</span></div><div class="line"></div><div class="line">       IP_NF_ASSERT(info);</div><div class="line">       IP_NF_ASSERT(master);</div><div class="line">       IP_NF_ASSERT(!(info-&gt;initialized &amp; (<span class="number">1</span>&lt;&lt;HOOK2MANIP(hooknum))));</div><div class="line"></div><div class="line">       DEBUGP(<span class="string">"nat_expected: We have a connection!\n"</span>);</div><div class="line">       exp_ftp_info = &amp;ct-&gt;master-&gt;help.exp_ftp_info;</div><div class="line"></div><div class="line">       LOCK_BH(&amp;ip_ftp_lock);</div><div class="line"></div><div class="line">       <span class="comment">/*    根据主conntrack中ftp的数据传输类型类型</span></div><div class="line">		*     来获取特定的需要转换的源、目的ip地址</div><div class="line"> 		*/</div><div class="line"></div><div class="line">       <span class="keyword">if</span> (exp_ftp_info-&gt;ftptype == IP_CT_FTP_PORT</div><div class="line">           || exp_ftp_info-&gt;ftptype == IP_CT_FTP_EPRT) &#123;</div><div class="line">              <span class="comment">/* PORT command: make connection go to the client. */</span></div><div class="line">              <span class="comment">/*    数据传输类型为PORT，那么第一个数据连接包是由server主动连接</span></div><div class="line">              *     到client，所以将DIR_ORIGINAL的conntrack的源，目的地址交换。</div><div class="line">              *     作为nat的目的，源地址。</div><div class="line">              */</div><div class="line">              newdstip = master-&gt;tuplehash[IP_CT_DIR_ORIGINAL].tuple.src.ip;</div><div class="line">              newsrcip = master-&gt;tuplehash[IP_CT_DIR_ORIGINAL].tuple.dst.ip;</div><div class="line">              DEBUGP(<span class="string">"nat_expected: PORT cmd. %u.%u.%u.%u-&gt;%u.%u.%u.%u\n"</span>,</div><div class="line">                     NIPQUAD(newsrcip), NIPQUAD(newdstip));</div><div class="line">       &#125; <span class="keyword">else</span> &#123;</div><div class="line">              <span class="comment">/* PASV command: make the connection go to the server */</span></div><div class="line">              <span class="comment">/*    数据传输类型为PASV，那么第一个数据连接包是由client主动连接</span></div><div class="line">              *     到server，所以将DIR_REPLY的conntrack（server发出的数据流）</div><div class="line">			  *     的源，目的地址交换。作为nat的目的，源地址。</div><div class="line">              */</div><div class="line"></div><div class="line">              newdstip = master-&gt;tuplehash[IP_CT_DIR_REPLY].tuple.src.ip;</div><div class="line">              newsrcip = master-&gt;tuplehash[IP_CT_DIR_REPLY].tuple.dst.ip;</div><div class="line">              DEBUGP(<span class="string">"nat_expected: PASV cmd. %u.%u.%u.%u-&gt;%u.%u.%u.%u\n"</span>,</div><div class="line">                     NIPQUAD(newsrcip), NIPQUAD(newdstip));</div><div class="line">       &#125;</div><div class="line"></div><div class="line">       UNLOCK_BH(&amp;ip_ftp_lock);</div><div class="line">       <span class="comment">/*    根据hook位置选择nat的ip地址</span></div><div class="line">		*     如果是SNAT， newip = newsrcip</div><div class="line">		*     是DNAT，newip = newdstip</div><div class="line">		*/</div><div class="line"></div><div class="line">       <span class="keyword">if</span> (HOOK2MANIP(hooknum) == IP_NAT_MANIP_SRC)</div><div class="line">              newip = newsrcip;</div><div class="line">       <span class="keyword">else</span></div><div class="line">              newip = newdstip;</div><div class="line"></div><div class="line">       DEBUGP(<span class="string">"nat_expected: IP to %u.%u.%u.%u\n"</span>, NIPQUAD(newip));</div><div class="line">       mr.rangesize = <span class="number">1</span>; <span class="comment">/* 该nat不做随机的选择 */</span></div><div class="line">       <span class="comment">/* We don’t want to manip the per-protocol, just the IPs… */</span></div><div class="line">       mr.range[<span class="number">0</span>].flags = IP_NAT_RANGE_MAP_IPS;</div><div class="line">       mr.range[<span class="number">0</span>].min_ip = mr.range[<span class="number">0</span>].max_ip = newip; <span class="comment">/* nat 到newip */</span></div><div class="line">       </div><div class="line">       <span class="comment">/* … unless we’re doing a MANIP_DST, in which case, make</span></div><div class="line">          sure we map to the correct port */</div><div class="line">       <span class="keyword">if</span> (HOOK2MANIP(hooknum) == IP_NAT_MANIP_DST) &#123;</div><div class="line">              <span class="comment">/*    不要忘了还有port转换。exp_ftp_info-&gt;port就是由</span></div><div class="line">				conntrack help 中查找tcp payload获得*/</div><div class="line">              mr.range[<span class="number">0</span>].flags |= IP_NAT_RANGE_PROTO_SPECIFIED;</div><div class="line">              mr.range[<span class="number">0</span>].min = mr.range[<span class="number">0</span>].max</div><div class="line">                     = ((<span class="keyword">union</span> ip_conntrack_manip_proto)</div><div class="line">                            &#123; .tcp = &#123; htons(exp_ftp_info-&gt;port) &#125; &#125;);</div><div class="line">       &#125;</div><div class="line"></div><div class="line">       <span class="keyword">return</span> ip_nat_setup_info(ct, &amp;mr, hooknum); <span class="comment">/* 注册入nat core中 */</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2005/11/12/Netfilter-FTP-Helper/" class="archive-article-date">
+  	<time datetime="2005-11-12T05:00:00.000Z" itemprop="datePublished"><i class="icon-clock"></i>2005-11-12</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/FTP/">FTP</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux/">Linux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Netfilter/">Netfilter</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+  
+<nav id="article-nav">
+  
+    <a href="/2006/03/01/Send-RST-Kernel/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          如何在kernel里发送RST包
+        
+      </div>
+    </a>
+  
+  
+</nav>
+
+
+
+
+<div class="share_jia">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">Share to: &nbsp; </span>
+		<a class="jiathis_button_facebook"></a> 
+	    <a class="jiathis_button_twitter"></a>
+	    <a class="jiathis_button_plus"></a> 
+	    <a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	</div>
+	<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
+
+
+
+
+
+
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="Netfilter-FTP-Helper" data-title="Netfilter FTP Helper源码分析" data-url="http://muddog.github.io/2005/11/12/Netfilter-FTP-Helper/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"muddog"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
+
+
+
+
+
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+    	<div class="footer-left">
+    		&copy; 2016 豆芽
+    	</div>
+      	<div class="footer-right">
+      		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
+      	</div>
+    </div>
+  </div>
+</footer>
+    </div>
+    <script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: false,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false,
+		root: "/",
+		innerArchive: true
+	}
+</script>
+
+<script src="/./main.js"></script>
+
+
+    
+<div class="tools-col">
+  <ul class="btn-wrap">
+    
+      <li class="chose" data-hook="tools-section-all"><span class="text">全部</span><i class="icon-book"></i></li>
+    
+    
+      <li data-hook="tools-section-tag"><span class="text">标签</span><i class="icon-price-tags"></i></li>
+    
+    
+    
+      <li data-hook="tools-section-me"><span class="text">我</span><i class="icon-smile"></i></li>
+    
+  </ul>
+  <div class="tools-wrap">
+    
+    	<section class="tools-section tools-section-all chose">
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-tag">
+    			<div class="widget tagcloud" id="js-tagcloud">
+    				<a href="/tags/Blocking/" style="font-size: 10px;">Blocking</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/Clocksource/" style="font-size: 10px;">Clocksource</a> <a href="/tags/DTLS/" style="font-size: 10px;">DTLS</a> <a href="/tags/Embeded/" style="font-size: 10px;">Embeded</a> <a href="/tags/FTP/" style="font-size: 10px;">FTP</a> <a href="/tags/Family/" style="font-size: 10px;">Family</a> <a href="/tags/HRTimer/" style="font-size: 10px;">HRTimer</a> <a href="/tags/Hangzhou/" style="font-size: 10px;">Hangzhou</a> <a href="/tags/IoT/" style="font-size: 13.33px;">IoT</a> <a href="/tags/Kernel/" style="font-size: 16.67px;">Kernel</a> <a href="/tags/Linux/" style="font-size: 20px;">Linux</a> <a href="/tags/Memory/" style="font-size: 10px;">Memory</a> <a href="/tags/Netfilter/" style="font-size: 13.33px;">Netfilter</a> <a href="/tags/Photography/" style="font-size: 10px;">Photography</a> <a href="/tags/RTOS/" style="font-size: 13.33px;">RTOS</a> <a href="/tags/TCP/" style="font-size: 10px;">TCP</a> <a href="/tags/Thread/" style="font-size: 13.33px;">Thread</a> <a href="/tags/Timekeeping/" style="font-size: 10px;">Timekeeping</a> <a href="/tags/buddy/" style="font-size: 10px;">buddy</a> <a href="/tags/handshake/" style="font-size: 10px;">handshake</a> <a href="/tags/mbed/" style="font-size: 10px;">mbed</a> <a href="/tags/mbedOS/" style="font-size: 10px;">mbedOS</a> <a href="/tags/mbedTLS/" style="font-size: 10px;">mbedTLS</a>
+    			</div>
+    	</section>
+    
+
+    
+
+    
+    	<section class="tools-section tools-section-me">
+  	  	
+  	  		<div class="aboutme-wrap" id="js-aboutme">土狗一只&lt;br&gt;&lt;br&gt;码农&lt;br&gt;嵌入式</div>
+  	  	
+    	</section>
+    
+  </div>
+  
+</div>
+    <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+  </div>
+</body>
+</html>
