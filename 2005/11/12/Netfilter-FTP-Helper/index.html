@@ -16,7 +16,7 @@ netfilter hook将FTP控制连接加入到conntrack pool中，每一个在该conn
 <meta property="og:site_name" content="MudDog">
 <meta property="og:description" content="由于nat表需要ip conntrack模块支持，因此在针对FTP数据连接的nat动作也需要conntrack支持。主要流程如下：
 netfilter hook将FTP控制连接加入到conntrack pool中，每一个在该conntrack上的数据报会被送至help函数（ip_conntrack_ftp.c），该函数由ip_conntrack_helper_unregister()注册成为该co">
-<meta property="og:updated_time" content="2016-12-18T15:15:20.210Z">
+<meta property="og:updated_time" content="2016-12-18T15:27:42.303Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Netfilter FTP Helper源码分析">
 <meta name="twitter:description" content="由于nat表需要ip conntrack模块支持，因此在针对FTP数据连接的nat动作也需要conntrack支持。主要流程如下：
