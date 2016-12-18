@@ -8,17 +8,17 @@
   <link rel="dns-prefetch" href="http://muddog.github.io">
   <title>玩转mbedOS | MudDog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="引子mbedOS是ARM自己打造、主打IoT的一整套软件解决方案，是一个针对ARM CortexM系列处理器的嵌入式开源生态。详细的一些介绍可以参见我的另一篇文章《IoT的那些操作系统》从日常的工作、及和其他支持部门的交流来看，mbedOS现在还处于成长和推广阶段，在国内正真使用的客户貌似还很少，国外确实有比较牛X的客户指名道姓需要NXP的硬件来支持mbedOS。本人还是比较看好mbed，毕竟亲爹">
+  <meta name="description" content="mbedOS是ARM自己打造、主打IoT的一整套软件解决方案，是一个针对ARM CortexM系列处理器的嵌入式开源生态。详细的一些介绍可以参见我的另一篇文章《IoT的那些操作系统》从日常的工作、及和其他支持部门的交流来看，mbedOS现在还处于成长和推广阶段，在国内正真使用的客户貌似还很少，国外确实有比较牛X的客户指名道姓需要NXP的硬件来支持mbedOS。本人还是比较看好mbed，毕竟亲爹是A">
 <meta property="og:type" content="article">
 <meta property="og:title" content="玩转mbedOS">
 <meta property="og:url" content="http://muddog.github.io/2016/11/25/Play-With-mbedOS/index.html">
 <meta property="og:site_name" content="MudDog">
-<meta property="og:description" content="引子mbedOS是ARM自己打造、主打IoT的一整套软件解决方案，是一个针对ARM CortexM系列处理器的嵌入式开源生态。详细的一些介绍可以参见我的另一篇文章《IoT的那些操作系统》从日常的工作、及和其他支持部门的交流来看，mbedOS现在还处于成长和推广阶段，在国内正真使用的客户貌似还很少，国外确实有比较牛X的客户指名道姓需要NXP的硬件来支持mbedOS。本人还是比较看好mbed，毕竟亲爹">
+<meta property="og:description" content="mbedOS是ARM自己打造、主打IoT的一整套软件解决方案，是一个针对ARM CortexM系列处理器的嵌入式开源生态。详细的一些介绍可以参见我的另一篇文章《IoT的那些操作系统》从日常的工作、及和其他支持部门的交流来看，mbedOS现在还处于成长和推广阶段，在国内正真使用的客户貌似还很少，国外确实有比较牛X的客户指名道姓需要NXP的硬件来支持mbedOS。本人还是比较看好mbed，毕竟亲爹是A">
 <meta property="og:image" content="https://docs.mbed.com/docs/debugging-on-mbed/en/latest/Debugging/Images/PyOCD1.png">
-<meta property="og:updated_time" content="2016-12-16T13:29:18.192Z">
+<meta property="og:updated_time" content="2016-12-18T15:27:42.302Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="玩转mbedOS">
-<meta name="twitter:description" content="引子mbedOS是ARM自己打造、主打IoT的一整套软件解决方案，是一个针对ARM CortexM系列处理器的嵌入式开源生态。详细的一些介绍可以参见我的另一篇文章《IoT的那些操作系统》从日常的工作、及和其他支持部门的交流来看，mbedOS现在还处于成长和推广阶段，在国内正真使用的客户貌似还很少，国外确实有比较牛X的客户指名道姓需要NXP的硬件来支持mbedOS。本人还是比较看好mbed，毕竟亲爹">
+<meta name="twitter:description" content="mbedOS是ARM自己打造、主打IoT的一整套软件解决方案，是一个针对ARM CortexM系列处理器的嵌入式开源生态。详细的一些介绍可以参见我的另一篇文章《IoT的那些操作系统》从日常的工作、及和其他支持部门的交流来看，mbedOS现在还处于成长和推广阶段，在国内正真使用的客户貌似还很少，国外确实有比较牛X的客户指名道姓需要NXP的硬件来支持mbedOS。本人还是比较看好mbed，毕竟亲爹是A">
 <meta name="twitter:image" content="https://docs.mbed.com/docs/debugging-on-mbed/en/latest/Debugging/Images/PyOCD1.png">
   
     <link rel="alternative" href="/atom.xml" title="MudDog" type="application/atom+xml">
@@ -164,7 +164,7 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h1 id="引子"><a href="#引子" class="headerlink" title="引子"></a>引子</h1><p>mbedOS是ARM自己打造、主打IoT的一整套软件解决方案，是一个针对ARM CortexM系列处理器的嵌入式开源生态。详细的一些介绍可以参见我的另一篇文章<a href="http://muddog.pub/2016/11/12/IoT-RTOS/" target="_blank" rel="external">《IoT的那些操作系统》</a><br>从日常的工作、及和其他支持部门的交流来看，mbedOS现在还处于成长和推广阶段，在国内正真使用的客户貌似还很少，国外确实有比较牛X的客户指名道姓需要NXP的硬件来支持mbedOS。本人还是比较看好mbed，毕竟亲爹是ARM，而且提供BLE，802.15.4，6LowPAN，Thread，驱动框架及RTOS等等丰富的软件解决方案。所以么，不要等客户培养起来了再去研究，早起的鸟儿有虫吃。</p>
+        <p>mbedOS是ARM自己打造、主打IoT的一整套软件解决方案，是一个针对ARM CortexM系列处理器的嵌入式开源生态。详细的一些介绍可以参见我的另一篇文章<a href="http://muddog.pub/2016/11/12/IoT-RTOS/" target="_blank" rel="external">《IoT的那些操作系统》</a><br>从日常的工作、及和其他支持部门的交流来看，mbedOS现在还处于成长和推广阶段，在国内正真使用的客户貌似还很少，国外确实有比较牛X的客户指名道姓需要NXP的硬件来支持mbedOS。本人还是比较看好mbed，毕竟亲爹是ARM，而且提供BLE，802.15.4，6LowPAN，Thread，驱动框架及RTOS等等丰富的软件解决方案。所以么，不要等客户培养起来了再去研究，早起的鸟儿有虫吃。</p>
 <h1 id="搭建环境"><a href="#搭建环境" class="headerlink" title="搭建环境"></a>搭建环境</h1><h2 id="开发板"><a href="#开发板" class="headerlink" title="开发板"></a>开发板</h2><p>mbedOS的例子大部分都可以直接跑在NXP的FRDM-K64之上。</p>
 <ul>
 <li>mbed官方对板子的<a href="https://developer.mbed.org/platforms/FRDM-K64F/" target="_blank" rel="external">介绍及使用方法</a>，</li>
@@ -172,7 +172,7 @@
 </ul>
 <p>买板子，虽然mbed和NXP都可以买，但还是淘宝吧，发货快。</p>
 <h2 id="开发工具"><a href="#开发工具" class="headerlink" title="开发工具"></a>开发工具</h2><p>mbedOS支持三种开发工具：<br>1.在线IDE<br>2.mbed CLI控制台<br>3.第三方开发工具，如IAR，MDK</p>
-<p>在线IDE编译很方便快捷，但没有调试功能。第三方的IDE都是可视化的，也没啥好介绍的。这里注重会来介绍mbed-cli，官方的介绍是它的作用贯穿于整个mbed工作流：代码仓库版本控制、依赖管理、代码发布、从其他地方获取代码、调用编译系统及其他。本文会介绍如何利用mbed-cli来：项目导入、下载、编译、测试等等。<br>无论你是用Windows还是Linux的主机，先准备好安装这四个工具：</p>
+<p>在线IDE编译很方便快捷，但没有调试功能。第三方的IDE都是可视化的，也没啥好介绍的。这里着重会来介绍mbed-cli，它的作用贯穿于整个mbed工作流：代码仓库版本控制、依赖管理、代码发布、从其他地方获取代码、调用编译系统及其他。无论你是用Windows还是Linux的主机，先准备好安装这四个工具：</p>
 <ul>
 <li>Python - mbed CLI 是用Python写的，并且在 version 2.7.11 上做过完整测试，不兼容Python3.x.</li>
 <li><a href="https://git-scm.com/" target="_blank" rel="external">Git</a> - version 1.9.5 or later</li>
@@ -188,7 +188,7 @@
 <p>安装方法如下：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ pip install --pre -U pyocd</div></pre></td></tr></table></figure>
 <p>但是pyOCD有个最大的缺陷，monitor的命令非常少（只支持reset, init, halt），对于调试来说手段很有限。所以这里会比较推荐OpenOCD。</p>
-<h3 id="OpenOCD"><a href="#OpenOCD" class="headerlink" title="OpenOCD"></a>OpenOCD</h3><p>非常强大的开源OCD，支持的调试接口非常多，不局限于CMSIS-DAP，支持包括Jlink，OSBDM，ULINK，ST-LINK等等。简单的安装方式是下载GNU ARM Eclipse OCD包：<a href="https://github.com/gnuarmeclipse/openocd/releases" target="_blank" rel="external">https://github.com/gnuarmeclipse/openocd/releases</a> 。如果从OpenOCD官网下载，你还需要编译源代码。</p>
+<h3 id="OpenOCD"><a href="#OpenOCD" class="headerlink" title="OpenOCD"></a>OpenOCD</h3><p>非常强大的开源OCD，支持的调试接口非常多，不局限于CMSIS-DAP，还支持包括Jlink，OSBDM，ULINK，ST-LINK等等。简单的安装方式是下载GNU ARM Eclipse OCD包：<a href="https://github.com/gnuarmeclipse/openocd/releases" target="_blank" rel="external">https://github.com/gnuarmeclipse/openocd/releases</a> 。如果从OpenOCD官网下载，你还需要编译源代码。</p>
 <h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><ul>
 <li>串口工具装一个，方便调试。Putty, minicom，串口调试助手等都可以。</li>
 <li>mbed serial，Windows串口驱动（<a href="https://developer.mbed.org/handbook/Windows-serial-configuration" target="_blank" rel="external">下载页面</a> ），Linux不需要。</li>
@@ -205,7 +205,7 @@
 <p>mbed-os/targets/targets.json</p>
 </blockquote>
 <p>K64的配置：<br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">"K64F": &#123;</div><div class="line">    "supported_form_factors": ["ARDUINO"],</div><div class="line">    "core": "Cortex-M4F",</div><div class="line">    "supported_toolchains": ["ARM", "GCC_ARM", "IAR"],</div><div class="line">    "extra_labels": ["Freescale", "KSDK2_MCUS", "FRDM", "KPSDK_MCUS", "KPSDK_CODE", "MCU_K64F"],</div><div class="line">    "is_disk_virtual": true,</div><div class="line">    "macros": ["CPU_MK64FN1M0VMD12", "FSL_RTOS_MBED"],</div><div class="line">    "inherits": ["Target"],</div><div class="line">    "detect_code": ["0240"],</div><div class="line">    "device_has": ["ANALOGIN", "ANALOGOUT", "ERROR_RED", "I2C", "I2CSLAVE", "INTERRUPTIN", "LOWPOWERTIMER", "PORTIN", "PORTINOUT", "PORTOUT", "PWMOUT", "RTC", "SERIAL", "SERIAL_FC", "SLEEP", "SPI", "SPISLAVE", "STDIO_MESSAGES", "STORAGE", "TRNG"],</div><div class="line">    "features": ["LWIP", "STORAGE"],</div><div class="line">    "release_versions": ["2", "5"],</div><div class="line">    "device_name": "MK64FN1M0xxx12"</div><div class="line">&#125;,</div></pre></td></tr></table></figure></p>
-<p>“target.features_add”表明除了lwip, storage外，我们还需要使能mbedOS里的nanostack及6lowpan的路由功能。<br>对于其他mbedOS相关的软件配置，例如mbed-mesh-api.打头的配置，可以在mesh网络的stack路径里找到：</p>
+<p>在mbed_app.json里的”target.features_add”表明除了lwip, storage外，我们还需要使能mbedOS里的nanostack及6lowpan的路由功能。对于其他mbedOS相关的软件配置，例如mbed-mesh-api.打头的配置，可以在mesh网络的stack路径里找到：</p>
 <blockquote>
 <p>mbed-os/features/nanostack/FEATURE_NANOSTACK/mbed-mesh-api/mbed_lib.json</p>
 </blockquote>
@@ -227,12 +227,18 @@
 <h2 id="创建新项目"><a href="#创建新项目" class="headerlink" title="创建新项目"></a>创建新项目</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ mbed new my-mbed-app</div></pre></td></tr></table></figure>
 <p>默认会生成并下载mbedOS这个依赖库，如果需要其他库，可以用下面的命令:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ mbed add &lt;git repo url&gt;</div></pre></td></tr></table></figure></p>
 <p>mbed会自动下载，保存在子目录下，并且帮你生产.lib文件。不需要这个依赖库时，可以使用remove命令删除.lib及源文件。通过以下命令可以查看当前项目的依赖关系：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">$ mbed ls</div><div class="line">my-mbed-app (None)</div><div class="line">|- mbed-client (203b74116e2e)</div><div class="line">|  |- mbed-client-classic (42f18d977122)</div><div class="line">|  `- mbed-client-mbed-tls (7e1b6d815038)</div><div class="line">`- mbed-os (d5de476f74dd)</div></pre></td></tr></table></figure></p>
+<p>写个简单的main.cpp，实现一个main()函数，例如点LED灯：<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"mbed.h"</span></span></div><div class="line"></div><div class="line"><span class="function">DigitalOut <span class="title">led1</span><span class="params">(LED1)</span></span>;</div><div class="line"></div><div class="line"><span class="comment">// main() runs in its own thread in the OS</span></div><div class="line"><span class="comment">// (note the calls to Thread::wait below for delays)</span></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</div><div class="line">    <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</div><div class="line">        led1 = !led1;</div><div class="line">        Thread::wait(<span class="number">500</span>);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<ul>
+<li>DigitalOut类实际上是GPIO输出驱动</li>
+<li>Thread类是线程</li>
+</ul>
+<p>后面我们会讲到一些常用的API，包括设备驱动及RTOS的接口。</p>
 <h2 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h2><p>编译需要指定target及toolchain：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ mbed compile -m K64 -t GCC_ARM</div></pre></td></tr></table></figure>
 <p>指定一次即可，后面可以直接使用compile编译，如果需要clean build，加上-c</p>
 <h2 id="调试"><a href="#调试" class="headerlink" title="调试"></a>调试</h2><p>前面的环境搭建里，安装好的pyOCD作为GDBServer，而GNU ARM Toolchain里的GDB则作为Client用来调试。</p>
 <h3 id="打开调试选项"><a href="#打开调试选项" class="headerlink" title="打开调试选项"></a>打开调试选项</h3><p>首先要把编译器的-g选项打开，将debug symbol编译进elf文件。那么mbedOS里提供了对应的toolchain配置profiles：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ mbed compile -c --profile mbed-os/tools/profiles/debug.json</div></pre></td></tr></table></figure></p>
-<p>这个debug.json里都是编译器选项，你可以按照自己的要求修改。编译结果：./BUILD/[targe]&gt;/[toolchain]/[project].elf</p>
+<p>这个debug.json里都是编译器选项，你可以按照自己的要求修改。编译结果：./BUILD/[targe]/[toolchain]/[project].elf</p>
 <h3 id="启动GDBServer"><a href="#启动GDBServer" class="headerlink" title="启动GDBServer"></a>启动GDBServer</h3><p>这里只讲OpenOCD。pyOCD比较简单，但调试用起来很不爽。首先，我们要自己为FRDM-K64写一个openOCD配置脚本，默认的release里没有。首先跑到GNU ARM Eclipse OCD安装目录下，例如：/c/Program Files/GNU ARM Eclipse/OpenOCD/0.10.0-201610281609-dev。在scripts/board/下新建一个frdm-k64.cfg，内容如下：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">source</span> [find interface/cmsis-dap.cfg]</div><div class="line"></div><div class="line"><span class="comment"># increase working area to 16KB</span></div><div class="line"><span class="built_in">set</span> WORKAREASIZE 0x4000</div><div class="line"></div><div class="line"><span class="comment"># chip name</span></div><div class="line"><span class="built_in">set</span> CHIPNAME MK64FN1M0VLL12</div><div class="line"></div><div class="line">reset_config srst_only</div><div class="line"></div><div class="line"><span class="built_in">source</span> [find target/kx.cfg]</div></pre></td></tr></table></figure>
 <p>然后启动OpenOCD GDBServer:</p>
@@ -243,13 +249,54 @@
 <p>注意，这里的mbed-os-example-clinet.bin是同elf文件在编译时候一起生成的，你需要拷贝到跑openocd的目录下，否则会报错找不到文件。</p>
 <p>接着，reset target，让硬件重新复位：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">(gdb) monitor reset init</div></pre></td></tr></table></figure></p>
 <p>接下来就可以用GDB的其他调试命令来调试了，这里就不多说。</p>
-<h1 id="内核分析"><a href="#内核分析" class="headerlink" title="内核分析"></a>内核分析</h1><p>mbedOS很有趣，从编写一个应用程序开始你会发现它和其他的RTOS有些不同。为啥它的main()函数里不需要做任何操作系统初始化，甚至板级初始化，亦或是建立其他进程？mbdOS的内核从CMSIS-RTOS衍生而来，为客户提供了最大程度上的Out of Box Experience的使用体验。它把操作系统、硬件初始化的一切都在main()之前做完了，而且main()其实就是一个单独的进程！我们来看看mbedOS到底是怎么做的，这里还是以K64F的硬件平台及GCC编译器为例。<br>我们都知道芯片上电都会从Reset_Handler向量开始，源代码在startup_MK64F12.S里。Reset_Handler首先会关闭Watchdog，然后将data数据段从Flash里拷贝到RAM中，之后调用_start，讲控制权交给C运行时库CRT。crt1.s里会提供一个软件初始化的hook供用户实现</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">extern</span> <span class="string">"C"</span> <span class="function"><span class="keyword">void</span> <span class="title">software_init_hook</span><span class="params">(<span class="keyword">void</span>)</span></span></div><div class="line">&#123;                                                          </div><div class="line">    mbed_sdk_init();                                                               </div><div class="line">    software_init_hook_rtos();                                                     </div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>mbed_sdk_init()会调用Kinetis SDK里的BOARD_BootXXX()来根据板子的时钟设计来配置时钟。software_init_hook_rtos()则是真正操作系统初始化的地方：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line">osThreadDef_t os_thread_def_main = &#123;(os_pthread)pre_main, osPriorityNormal, <span class="number">1U</span>, <span class="keyword">sizeof</span>(thread_stack_main), thread_stack_main&#125;;</div><div class="line">...</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">pre_main</span><span class="params">(<span class="keyword">void</span>)</span> </span>&#123;</div><div class="line">    singleton_mutex_id = osMutexCreate(osMutex(singleton_mutex));</div><div class="line">    malloc_mutex_id = osMutexCreate(osMutex(malloc_mutex));</div><div class="line">    env_mutex_id = osMutexCreate(osMutex(env_mutex));</div><div class="line">    __libc_init_array();</div><div class="line">    main(<span class="number">0</span>, <span class="literal">NULL</span>);</div><div class="line">&#125;</div><div class="line"></div><div class="line">__attribute__((naked)) <span class="function"><span class="keyword">void</span> <span class="title">software_init_hook_rtos</span> <span class="params">(<span class="keyword">void</span>)</span> </span>&#123;</div><div class="line">  __asm (</div><div class="line">    <span class="string">"bl   osKernelInitialize\n"</span></div><div class="line">#ifdef __MBED_CMSIS_RTOS_CM</div><div class="line">    <span class="string">"bl   set_stack_heap\n"</span></div><div class="line">#endif</div><div class="line">    <span class="string">"ldr  r0,=os_thread_def_main\n"</span>                                                </div><div class="line">    <span class="string">"movs r1,#0\n"</span>                                                                 </div><div class="line">    <span class="string">"bl   osThreadCreate\n"</span>                                                        </div><div class="line">    <span class="string">"bl   osKernelStart\n"</span></div><div class="line">    <span class="comment">/* osKernelStart should not return */</span></div><div class="line">    <span class="string">"B       .\n"</span></div><div class="line">  );</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>software_init_hook_rtos首先调用osKernelInitialize()，它根据当前的CPU权限通过svc call或者直接调用svcKernelInitialize()：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line"><span class="function">osStatus <span class="title">svcKernelInitialize</span> <span class="params">(<span class="keyword">void</span>)</span> </span>&#123;</div><div class="line">  <span class="keyword">if</span> (!os_initialized) &#123;</div><div class="line">    rt_sys_init();                              <span class="comment">// RTX System Initialization</span></div><div class="line">  &#125; </div><div class="line"></div><div class="line">  os_tsk.run-&gt;prio = <span class="number">255U</span>;                      <span class="comment">// Highest priority</span></div><div class="line"></div><div class="line">  <span class="keyword">if</span> (os_initialized == <span class="number">0U</span>) &#123;</div><div class="line">    <span class="comment">// Create OS Timers resources (Message Queue &amp; Thread)</span></div><div class="line">    osMessageQId_osTimerMessageQ = svcMessageCreate (&amp;os_messageQ_def_osTimerMessageQ, <span class="literal">NULL</span>);</div><div class="line">    osThreadId_osTimerThread = svcThreadCreate(&amp;os_thread_def_osTimerThread, <span class="literal">NULL</span>, <span class="literal">NULL</span>);</div><div class="line">    <span class="comment">// Initialize thread mutex</span></div><div class="line">    osMutexId_osThreadMutex = osMutexCreate(osMutex(osThreadMutex));</div><div class="line">  &#125;</div><div class="line"></div><div class="line">  sysThreadError(osOK);</div><div class="line"></div><div class="line">  os_initialized = <span class="number">1U</span>;</div><div class="line">  os_running = <span class="number">0U</span>;</div><div class="line"></div><div class="line">  <span class="keyword">return</span> osOK;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1>
+<h1 id="API介绍"><a href="#API介绍" class="headerlink" title="API介绍"></a>API介绍</h1><p>mbedOS的接口都是以C++的接口形式实现，也就是说对于某一类对象或者操作都会封装成类。所以API都是以类函数和静态函数提供。当然重载的操作符Operator，例如=，()，+/-都是很常见的，它可以非常直观的操作设备和对象。</p>
+<p>mbedOS提供以下几种类型的API：</p>
+<blockquote>
+<ul>
+<li>Task management: handling tasks and events in mbed OS.</li>
+<li>Inputs and outputs: analog, digital, bus, port, PwmOut and interrupts.</li>
+<li>Digital interfaces: serial, SPI, I2C and CAN.</li>
+<li>Communication: network sockets, Ethernet, WiFi and BLE.</li>
+<li>Security: working with mbed uVisor and mbed TLS in the context of mbed OS.</li>
+</ul>
+</blockquote>
+<h2 id="任务管理"><a href="#任务管理" class="headerlink" title="任务管理"></a>任务管理</h2><ul>
+<li>Thread任务管理类，进程间通讯类（互斥体 Mutex、信号量 Samaphore、信号 Signal、邮箱 Mail、队列 Queue），及RtosTimer内核时钟定时器类</li>
+<li>EventLoop事件回环类，主要用途是使得中断触发的事件处理可以在用户上下文中执行，而不是在IRQ里占用大量资源。说白了，就是在IRQ里触发一个事件，将等待该事件队列中的任务唤醒，来处理事件。</li>
+<li>Time日期时间类</li>
+<li>Ticker周期性定时器类</li>
+<li>TimeOut超时定时器类</li>
+<li>Timer时间间隔计量类</li>
+<li>Wait延时类（忙等待延时）</li>
+</ul>
+<h2 id="输入、输出设备"><a href="#输入、输出设备" class="headerlink" title="输入、输出设备"></a>输入、输出设备</h2><p>主要分为三类pin：模拟，数字和PWM。在实际的芯片上，你可以认为</p>
+<ul>
+<li>AnalogIn是ADC采样类，AnalogOut是DAC模拟输出类</li>
+<li>DigitalIn/Out是GPIO的输入输出类</li>
+<li>BusIn/Out是自定义的一组GPIO操作的类</li>
+<li>PortIn/Out则是对于某一组GPIO的所有组内的GPIO操作的类</li>
+<li>PwmOut则是PWM模块的方波输出类</li>
+<li>InterruptIn则是将GPIO配置成输入产生中断的类</li>
+</ul>
+<h2 id="数字接口"><a href="#数字接口" class="headerlink" title="数字接口"></a>数字接口</h2><p>很简单，分成：</p>
+<ul>
+<li>Serial, UART类</li>
+<li>SPI/SPISlave 类</li>
+<li>I2C/I2CSlave 类</li>
+<li>CAN 类</li>
+</ul>
+<h2 id="通讯"><a href="#通讯" class="headerlink" title="通讯"></a>通讯</h2><ul>
+<li>网络Sockets，标准的Socket接口，只是以C++封装</li>
+<li>以太网，连接，获取MAC地址等的接口</li>
+<li>WiFi，进行scan,连接到指定SSID等的接口</li>
+<li>BLE，一套完整的BLE类接口（<a href="https://docs.mbed.com/docs/mbed-os-api-reference/en/5.1/APIs/communication/ble/）" target="_blank" rel="external">https://docs.mbed.com/docs/mbed-os-api-reference/en/5.1/APIs/communication/ble/）</a> 和上面的三类接口比起来相对独立。以太网、Wifi只是对网络设备的基本操作，之后都可以走socket做通讯。</li>
+</ul>
+<h2 id="安全（C接口）"><a href="#安全（C接口）" class="headerlink" title="安全（C接口）"></a>安全（C接口）</h2><ul>
+<li>mbed uVisor，利用MPU来创建沙箱保护memory map上的指定的内存、设备区域；利用Cortex的SVCall将操作系统、中断处理的权限提升。具体的还没研究。等下一篇内核分析吧。</li>
+<li>mbed TLS，常用于嵌入式的TLS库（原PolarSSL）接口</li>
+</ul>
+<p>所有的这些API都可以在这里找到：<a href="https://docs.mbed.com/docs/mbed-os-api-reference/en/5.3/" target="_blank" rel="external">mbedOS API 参考手册</a></p>
+
       
     </div>
     <div class="article-info article-info-index">

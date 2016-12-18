@@ -218,7 +218,7 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h1 id="引子"><a href="#引子" class="headerlink" title="引子"></a>引子</h1><p>mbedOS是ARM自己打造、主打IoT的一整套软件解决方案，是一个针对ARM CortexM系列处理器的嵌入式开源生态。详细的一些介绍可以参见我的另一篇文章<a href="http://muddog.pub/2016/11/12/IoT-RTOS/">《IoT的那些操作系统》</a><br>从日常的工作、及和其他支持部门的交流来看，mbedOS现在还处于成长和推广阶段，在国内正真使用的客户貌似还很少，国外确实有比较牛X的客户指名道姓需要NXP的硬件来支持mbedOS。本人还是比较看好mbed，毕竟亲爹是ARM，而且提供BLE，802.15.4，6LowPAN，Thread，驱动框架及RTOS等等丰富的软件解决方案。所以么，不要等客户培养起来了再去研究，早起的鸟儿有虫吃。</p>
+        <p>mbedOS是ARM自己打造、主打IoT的一整套软件解决方案，是一个针对ARM CortexM系列处理器的嵌入式开源生态。详细的一些介绍可以参见我的另一篇文章<a href="http://muddog.pub/2016/11/12/IoT-RTOS/">《IoT的那些操作系统》</a><br>从日常的工作、及和其他支持部门的交流来看，mbedOS现在还处于成长和推广阶段，在国内正真使用的客户貌似还很少，国外确实有比较牛X的客户指名道姓需要NXP的硬件来支持mbedOS。本人还是比较看好mbed，毕竟亲爹是ARM，而且提供BLE，802.15.4，6LowPAN，Thread，驱动框架及RTOS等等丰富的软件解决方案。所以么，不要等客户培养起来了再去研究，早起的鸟儿有虫吃。</p>
 <h1 id="搭建环境"><a href="#搭建环境" class="headerlink" title="搭建环境"></a>搭建环境</h1><h2 id="开发板"><a href="#开发板" class="headerlink" title="开发板"></a>开发板</h2><p>mbedOS的例子大部分都可以直接跑在NXP的FRDM-K64之上。</p>
 <ul>
 <li>mbed官方对板子的<a href="https://developer.mbed.org/platforms/FRDM-K64F/">介绍及使用方法</a>，</li>
@@ -226,7 +226,7 @@
 </ul>
 <p>买板子，虽然mbed和NXP都可以买，但还是淘宝吧，发货快。</p>
 <h2 id="开发工具"><a href="#开发工具" class="headerlink" title="开发工具"></a>开发工具</h2><p>mbedOS支持三种开发工具：<br>1.在线IDE<br>2.mbed CLI控制台<br>3.第三方开发工具，如IAR，MDK</p>
-<p>在线IDE编译很方便快捷，但没有调试功能。第三方的IDE都是可视化的，也没啥好介绍的。这里注重会来介绍mbed-cli，官方的介绍是它的作用贯穿于整个mbed工作流：代码仓库版本控制、依赖管理、代码发布、从其他地方获取代码、调用编译系统及其他。本文会介绍如何利用mbed-cli来：项目导入、下载、编译、测试等等。<br>无论你是用Windows还是Linux的主机，先准备好安装这四个工具：</p>
+<p>在线IDE编译很方便快捷，但没有调试功能。第三方的IDE都是可视化的，也没啥好介绍的。这里着重会来介绍mbed-cli，它的作用贯穿于整个mbed工作流：代码仓库版本控制、依赖管理、代码发布、从其他地方获取代码、调用编译系统及其他。无论你是用Windows还是Linux的主机，先准备好安装这四个工具：</p>
 <ul>
 <li>Python - mbed CLI 是用Python写的，并且在 version 2.7.11 上做过完整测试，不兼容Python3.x.</li>
 <li><a href="https://git-scm.com/">Git</a> - version 1.9.5 or later</li>

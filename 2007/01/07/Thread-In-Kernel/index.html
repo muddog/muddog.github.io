@@ -14,7 +14,7 @@
 <meta property="og:url" content="http://muddog.github.io/2007/01/07/Thread-In-Kernel/index.html">
 <meta property="og:site_name" content="MudDog">
 <meta property="og:description" content="最近QA报来的一个bug，引发了我对2.6.x linux线程实现的兴趣。以前一直以为pthread只是简单的利用clone() syscall来实现，2.4和2.6的kernel在这方面应该没有什么大改进。可稍微研究一下，才发现自己错了。Linux 2.6.x kernel 加入了对POSIX标准线程的支持。而在应用层，有LinuxThread和NPTL两个不同的库，不过接口都一样，库名也都是p">
-<meta property="og:updated_time" content="2016-12-16T13:43:53.284Z">
+<meta property="og:updated_time" content="2016-12-18T15:15:20.207Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Thread supported in Kernel">
 <meta name="twitter:description" content="最近QA报来的一个bug，引发了我对2.6.x linux线程实现的兴趣。以前一直以为pthread只是简单的利用clone() syscall来实现，2.4和2.6的kernel在这方面应该没有什么大改进。可稍微研究一下，才发现自己错了。Linux 2.6.x kernel 加入了对POSIX标准线程的支持。而在应用层，有LinuxThread和NPTL两个不同的库，不过接口都一样，库名也都是p">

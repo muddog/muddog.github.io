@@ -14,7 +14,7 @@
 <meta property="og:url" content="http://muddog.github.io/2007/04/08/Kernel-Memory-Allocation/index.html">
 <meta property="og:site_name" content="MudDog">
 <meta property="og:description" content="这周BSP那边碰到一个蛮严重的issue： 循环放电影，v4l2 output driver的 dma_alloc很容易就失败，kernel panic，dump出当前buddy系统的状态。初步分析是由于内存fragment导致没有足够大的连续内存分配给v4l output driver。开始debug首先通过/proc/buddyinfo 在播放电影时候不间断的dump buddy状态，发现大块">
-<meta property="og:updated_time" content="2016-12-16T13:43:53.285Z">
+<meta property="og:updated_time" content="2016-12-18T15:15:20.209Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Kernel中的内存分配方式">
 <meta name="twitter:description" content="这周BSP那边碰到一个蛮严重的issue： 循环放电影，v4l2 output driver的 dma_alloc很容易就失败，kernel panic，dump出当前buddy系统的状态。初步分析是由于内存fragment导致没有足够大的连续内存分配给v4l output driver。开始debug首先通过/proc/buddyinfo 在播放电影时候不间断的dump buddy状态，发现大块">
