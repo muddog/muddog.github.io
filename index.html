@@ -145,6 +145,60 @@
       <div class="body-wrap">
         
   
+    <article id="post-Dog-Nanny" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/12/24/Dog-Nanny/">找回豆芽保姆</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>找回了几年前做的“豆芽保姆”，原来它安静的躺在Google Code上。早当年用github都好。果断将它搬家到github： <a href="https://github.com/muddog/dognanny" target="_blank" rel="external">https://github.com/muddog/dognanny</a></p>
+<h2 id="接口微博"><a href="#接口微博" class="headerlink" title="接口微博"></a>接口微博</h2><p><a href="http://weibo.com/u/3211753593?refer_flag=1005055013_&amp;is_all=1" target="_blank" rel="external">@豆芽保姆</a></p>
+<h2 id="硬件平台"><a href="#硬件平台" class="headerlink" title="硬件平台"></a>硬件平台</h2><p>i.MX6D的开发板 + Temper1 USB温度传感器 + UVC摄像头 + USB红外控制器<br><img src="http://ww2.sinaimg.cn/mw690/62c2bccfjw1e1lzyl3xk6j.jpg" width="640"></p>
+<h2 id="软件"><a href="#软件" class="headerlink" title="软件"></a>软件</h2><p>Ubuntu + Python + C</p>
+<h2 id="效果"><a href="#效果" class="headerlink" title="效果"></a>效果</h2><p>在微博上找@豆芽保姆</p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2016/12/24/Dog-Nanny/" class="archive-article-date">
+  	<time datetime="2016-12-24T14:28:00.366Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-24</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/IoT/">IoT</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux/">Linux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Python/">Python</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/豆芽保姆/">豆芽保姆</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-Sunshine-Hangzhou" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -676,58 +730,6 @@ Cloud &lt;-&gt; Board router &lt;-&gt; Nodes (things connected)
 
 
   
-    <article id="post-Send-RST-Kernel" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2006/03/01/Send-RST-Kernel/">如何在kernel里发送RST包</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>kernel里发送RST包比较麻烦，首先你需要构造一个skb就够（很害怕吧！呵呵），再次要填充skb-&gt;data。当然就是填充ip、tcp头了。第一步，我们可以偷懒，用先前接收到的skb（RST肯定是在接收到SYN，或者主动异常中止链接，之前对方的包已收到）做为蓝本来构造RST的skb，或者干脆就拿这个skb来用。在有netfilter的kernel里，最典范的代码应该在ipt_REJECT target中。以下摘录，并分析它：</p>
-        <p class="article-more-link">
-          <a class="article-more-a"  href="/2006/03/01/Send-RST-Kernel/#more">more >></a>
-        </p>
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2006/03/01/Send-RST-Kernel/" class="archive-article-date">
-  	<time datetime="2006-03-01T05:00:00.000Z" itemprop="datePublished"><i class="icon-clock"></i>2006-03-01</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux/">Linux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Netfilter/">Netfilter</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/TCP/">TCP</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
@@ -791,7 +793,7 @@ Cloud &lt;-&gt; Board router &lt;-&gt; Nodes (things connected)
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Blocking/" style="font-size: 10px;">Blocking</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/Clocksource/" style="font-size: 10px;">Clocksource</a> <a href="/tags/DTLS/" style="font-size: 10px;">DTLS</a> <a href="/tags/Embeded/" style="font-size: 10px;">Embeded</a> <a href="/tags/FTP/" style="font-size: 10px;">FTP</a> <a href="/tags/Family/" style="font-size: 10px;">Family</a> <a href="/tags/HRTimer/" style="font-size: 10px;">HRTimer</a> <a href="/tags/Hangzhou/" style="font-size: 10px;">Hangzhou</a> <a href="/tags/IoT/" style="font-size: 13.33px;">IoT</a> <a href="/tags/Kernel/" style="font-size: 16.67px;">Kernel</a> <a href="/tags/Linux/" style="font-size: 20px;">Linux</a> <a href="/tags/Memory/" style="font-size: 10px;">Memory</a> <a href="/tags/Netfilter/" style="font-size: 13.33px;">Netfilter</a> <a href="/tags/Photography/" style="font-size: 10px;">Photography</a> <a href="/tags/RTOS/" style="font-size: 13.33px;">RTOS</a> <a href="/tags/TCP/" style="font-size: 10px;">TCP</a> <a href="/tags/Thread/" style="font-size: 13.33px;">Thread</a> <a href="/tags/Timekeeping/" style="font-size: 10px;">Timekeeping</a> <a href="/tags/buddy/" style="font-size: 10px;">buddy</a> <a href="/tags/handshake/" style="font-size: 10px;">handshake</a> <a href="/tags/mbed/" style="font-size: 10px;">mbed</a> <a href="/tags/mbedOS/" style="font-size: 10px;">mbedOS</a> <a href="/tags/mbedTLS/" style="font-size: 10px;">mbedTLS</a>
+    				<a href="/tags/Blocking/" style="font-size: 10px;">Blocking</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/Clocksource/" style="font-size: 10px;">Clocksource</a> <a href="/tags/DTLS/" style="font-size: 10px;">DTLS</a> <a href="/tags/Embeded/" style="font-size: 10px;">Embeded</a> <a href="/tags/FTP/" style="font-size: 10px;">FTP</a> <a href="/tags/Family/" style="font-size: 10px;">Family</a> <a href="/tags/HRTimer/" style="font-size: 10px;">HRTimer</a> <a href="/tags/Hangzhou/" style="font-size: 10px;">Hangzhou</a> <a href="/tags/IoT/" style="font-size: 15px;">IoT</a> <a href="/tags/Kernel/" style="font-size: 17.5px;">Kernel</a> <a href="/tags/Linux/" style="font-size: 20px;">Linux</a> <a href="/tags/Memory/" style="font-size: 10px;">Memory</a> <a href="/tags/Netfilter/" style="font-size: 12.5px;">Netfilter</a> <a href="/tags/Photography/" style="font-size: 10px;">Photography</a> <a href="/tags/Python/" style="font-size: 10px;">Python</a> <a href="/tags/RTOS/" style="font-size: 12.5px;">RTOS</a> <a href="/tags/TCP/" style="font-size: 10px;">TCP</a> <a href="/tags/Thread/" style="font-size: 12.5px;">Thread</a> <a href="/tags/Timekeeping/" style="font-size: 10px;">Timekeeping</a> <a href="/tags/buddy/" style="font-size: 10px;">buddy</a> <a href="/tags/handshake/" style="font-size: 10px;">handshake</a> <a href="/tags/mbed/" style="font-size: 10px;">mbed</a> <a href="/tags/mbedOS/" style="font-size: 10px;">mbedOS</a> <a href="/tags/mbedTLS/" style="font-size: 10px;">mbedTLS</a> <a href="/tags/豆芽保姆/" style="font-size: 10px;">豆芽保姆</a>
     			</div>
     	</section>
     
