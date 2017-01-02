@@ -145,6 +145,57 @@
       <div class="body-wrap">
         
   
+    <article id="post-Block-NonBlock-In-Kernel" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2006/03/02/Block-NonBlock-In-Kernel/">kernel中的阻塞与非阻塞</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>“要效率，就用NON-BLOCK操作吧！”， 这大概是很多program，特别是玩网络的深信不移的话。那么kernel里是如何实现阻塞和非阻塞的呢？<br>kernel里一般利用filp-&gt;f_flag中的O_NONBLOCK位，或者诸如release socket时利用的sock-&gt;sk-&gt;linger标志，来判断该操作是否可以阻塞。如果可以，则将进程设置成TASK_INTERRUPTIBLE 或者 TASK_UNINTERRUPTIBLE， 加入到该操作相关的等待队列，然后探测异步操作是否结束，如果操作结束，则该进程继续执行，否则schedule，阻塞自己。当阻塞的进程由于异步事件的到来而被唤醒时，再次判断操作是否完成，如果还未完成，继续schedule，否则，进程重新执行下去。<br>这里就存在一个问题，如何在操作未完成时强制唤醒阻塞进程呢？如果进程阻塞时，进程状态设置成TASK_INTERRUPTIBLE，那么一个signal将会唤醒进程。否则只能等待操作完成。所以如果你自己再kernel里写了一些能阻塞的操作，并且希望异步的停止阻塞，那么请确保该阻塞操作是可被中断的。下面来看一个例子：<br>下面这个函数是被tcp_ipv4.c:tcp_accept()中调用的，用来等待一个连接到来。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/* 注意参数中的timeo，如果是非阻塞，值为0 */</span></div><div class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">wait_for_connect</span><span class="params">(<span class="keyword">struct</span> sock * sk, <span class="keyword">long</span> timeo)</span></span></div><div class="line">&#123;</div><div class="line">    DECLARE_WAITQUEUE(wait, current);</div><div class="line">    <span class="keyword">int</span> err;</div><div class="line"> </div><div class="line">    add_wait_queue_exclusive(sk-&gt;sleep, &amp;wait); <span class="comment">// 加入到sk-&gt;sleep的等待队列上，准备阻塞。</span></div><div class="line">    <span class="keyword">for</span> (;;) &#123;  <span class="comment">// 循环判断操作是否完成，未完成则schedule</span></div><div class="line">        current-&gt;state = TASK_INTERRUPTIBLE; <span class="comment">// 可被signal中断</span></div><div class="line">        release_sock(sk);</div><div class="line">        <span class="keyword">if</span> (sk-&gt;tp_pinfo.af_tcp.accept_queue == <span class="literal">NULL</span>) <span class="comment">// 接收队列中是否有新连接？</span></div><div class="line">            timeo = schedule_timeout(timeo); <span class="comment">// 无新连接，则执行重新调度。如果timeo==0 schedule_timeout的行为类似schedule，但是进程确被重新放入running task队列中，等待运行，所以会被快速的执行。</span></div><div class="line">        lock_sock(sk);</div><div class="line">        err = <span class="number">0</span>;</div><div class="line">        <span class="keyword">if</span> (sk-&gt;tp_pinfo.af_tcp.accept_queue)</div><div class="line">            <span class="keyword">break</span>;</div><div class="line">        err = -EINVAL;</div><div class="line">        <span class="keyword">if</span> (sk-&gt;state != TCP_LISTEN)</div><div class="line">            <span class="keyword">break</span>;</div><div class="line">        err = sock_intr_errno(timeo);</div><div class="line">        <span class="keyword">if</span> (signal_pending(current))  <span class="comment">// 如果有信号到来，则跳出循环，停止阻塞</span></div><div class="line">            <span class="keyword">break</span>;</div><div class="line">        err = -EAGAIN;</div><div class="line">        <span class="keyword">if</span> (!timeo) <span class="comment">// 超时，或者是非阻塞操作，则跳出循环</span></div><div class="line">            <span class="keyword">break</span>;</div><div class="line">    &#125;</div><div class="line">    current-&gt;state = TASK_RUNNING;</div><div class="line">    remove_wait_queue(sk-&gt;sleep, &amp;wait); <span class="comment">// 把该进程从等待队列中删除</span></div><div class="line">    <span class="keyword">return</span> err;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2006/03/02/Block-NonBlock-In-Kernel/" class="archive-article-date">
+  	<time datetime="2006-03-01T16:00:00.000Z" itemprop="datePublished"><i class="icon-clock"></i>2006-03-02</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Blocking/">Blocking</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Kernel/">Kernel</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux/">Linux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Thread/">Thread</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-Send-RST-Kernel" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -263,7 +314,7 @@
   <div class="outer">
     <div id="footer-info">
     	<div class="footer-left">
-    		&copy; 2016 豆芽
+    		&copy; 2017 豆芽
     	</div>
       	<div class="footer-right">
       		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
@@ -314,7 +365,7 @@
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Blocking/" style="font-size: 10px;">Blocking</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/Clocksource/" style="font-size: 10px;">Clocksource</a> <a href="/tags/DTLS/" style="font-size: 10px;">DTLS</a> <a href="/tags/Embeded/" style="font-size: 10px;">Embeded</a> <a href="/tags/FTP/" style="font-size: 10px;">FTP</a> <a href="/tags/Family/" style="font-size: 10px;">Family</a> <a href="/tags/HRTimer/" style="font-size: 10px;">HRTimer</a> <a href="/tags/Hangzhou/" style="font-size: 10px;">Hangzhou</a> <a href="/tags/IoT/" style="font-size: 15px;">IoT</a> <a href="/tags/Kernel/" style="font-size: 17.5px;">Kernel</a> <a href="/tags/Linux/" style="font-size: 20px;">Linux</a> <a href="/tags/Memory/" style="font-size: 10px;">Memory</a> <a href="/tags/Netfilter/" style="font-size: 12.5px;">Netfilter</a> <a href="/tags/Photography/" style="font-size: 10px;">Photography</a> <a href="/tags/Python/" style="font-size: 10px;">Python</a> <a href="/tags/RTOS/" style="font-size: 12.5px;">RTOS</a> <a href="/tags/TCP/" style="font-size: 10px;">TCP</a> <a href="/tags/Thread/" style="font-size: 12.5px;">Thread</a> <a href="/tags/Timekeeping/" style="font-size: 10px;">Timekeeping</a> <a href="/tags/buddy/" style="font-size: 10px;">buddy</a> <a href="/tags/handshake/" style="font-size: 10px;">handshake</a> <a href="/tags/mbed/" style="font-size: 10px;">mbed</a> <a href="/tags/mbedOS/" style="font-size: 10px;">mbedOS</a> <a href="/tags/mbedTLS/" style="font-size: 10px;">mbedTLS</a> <a href="/tags/豆芽保姆/" style="font-size: 10px;">豆芽保姆</a>
+    				<a href="/tags/Blocking/" style="font-size: 10px;">Blocking</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/Clocksource/" style="font-size: 10px;">Clocksource</a> <a href="/tags/DTLS/" style="font-size: 10px;">DTLS</a> <a href="/tags/Embeded/" style="font-size: 10px;">Embeded</a> <a href="/tags/FTP/" style="font-size: 10px;">FTP</a> <a href="/tags/Family/" style="font-size: 10px;">Family</a> <a href="/tags/HRTimer/" style="font-size: 10px;">HRTimer</a> <a href="/tags/Hangzhou/" style="font-size: 10px;">Hangzhou</a> <a href="/tags/IoT/" style="font-size: 15px;">IoT</a> <a href="/tags/Kernel/" style="font-size: 17.5px;">Kernel</a> <a href="/tags/Linux/" style="font-size: 20px;">Linux</a> <a href="/tags/Memory/" style="font-size: 10px;">Memory</a> <a href="/tags/Netfilter/" style="font-size: 12.5px;">Netfilter</a> <a href="/tags/Photography/" style="font-size: 10px;">Photography</a> <a href="/tags/Python/" style="font-size: 10px;">Python</a> <a href="/tags/QT/" style="font-size: 10px;">QT</a> <a href="/tags/RTOS/" style="font-size: 12.5px;">RTOS</a> <a href="/tags/TCP/" style="font-size: 10px;">TCP</a> <a href="/tags/Thread/" style="font-size: 12.5px;">Thread</a> <a href="/tags/Timekeeping/" style="font-size: 10px;">Timekeeping</a> <a href="/tags/Yocto/" style="font-size: 10px;">Yocto</a> <a href="/tags/buddy/" style="font-size: 10px;">buddy</a> <a href="/tags/handshake/" style="font-size: 10px;">handshake</a> <a href="/tags/i-MX6/" style="font-size: 10px;">i.MX6</a> <a href="/tags/mbed/" style="font-size: 10px;">mbed</a> <a href="/tags/mbedOS/" style="font-size: 10px;">mbedOS</a> <a href="/tags/mbedTLS/" style="font-size: 10px;">mbedTLS</a> <a href="/tags/豆芽保姆/" style="font-size: 10px;">豆芽保姆</a>
     			</div>
     	</section>
     
