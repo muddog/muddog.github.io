@@ -22,7 +22,7 @@
 <meta property="og:image" content="http://ohx9w4r3g.bkt.clouddn.com/blog/qt/devices.png">
 <meta property="og:image" content="http://ohx9w4r3g.bkt.clouddn.com/blog/qt/build_settings.png">
 <meta property="og:image" content="http://ohx9w4r3g.bkt.clouddn.com/blog/qt/run_settings.png">
-<meta property="og:updated_time" content="2017-01-02T05:18:44.405Z">
+<meta property="og:updated_time" content="2017-01-02T13:27:39.413Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Enable QT developement for i.MX6UL">
 <meta name="twitter:description" content="Qt is a cross-platform application framework that is widely used for developing application software that can be run on various software and hardware platforms with little or no change in the underlyi">
@@ -183,9 +183,9 @@
 <li>Qt Creator IDE</li>
 <li>Qt5.6 source code</li>
 <li>HOST build toolchain</li>
-<li>TARGET build toolchain</li>
+<li>TARGET build toolchain<a id="more"></a>
+Qt Creator is a cross-platform C++, JavaScript and QML integrated development environment which is part of the SDK for the Qt GUI Application development framework. It includes a visual debugger and an integrated GUI layout and forms designer. It can run on both Windows, MacOS and Linux, developer create a Qt application on PC HOST and debug the UI on HOST build with HOST toolchain firstly. When debug completed, developer could use TARGET toolchain to build the application, and deploy the binary to embedded system like i.MX6UL linux.</li>
 </ol>
-<p>Qt Creator is a cross-platform C++, JavaScript and QML integrated development environment which is part of the SDK for the Qt GUI Application development framework. It includes a visual debugger and an integrated GUI layout and forms designer. It can run on both Windows, MacOS and Linux, developer create a Qt application on PC HOST and debug the UI on HOST build with HOST toolchain firstly. When debug completed, developer could use TARGET toolchain to build the application, and deploy the binary to embedded system like i.MX6UL linux.</p>
 <p>The HOST toolchain would be downloaded with SDK, but the TARGET toolchain is downloaded by Yocto introduced below.</p>
 <h3 id="Setup-Ubuntu"><a href="#Setup-Ubuntu" class="headerlink" title="Setup Ubuntu"></a>Setup Ubuntu</h3><p>The default GCC-6 on Ubuntu 16.10 has issue to build the lzop tools for Yocto, install the GCC-5 and create gcc/g++ link to GCC-5 under /usr/bin.</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ sudo apt-get install gcc-5-base gcc-5-multilib</div></pre></td></tr></table></figure>
