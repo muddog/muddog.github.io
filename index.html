@@ -145,6 +145,71 @@
       <div class="body-wrap">
         
   
+    <article id="post-Krabi-Trip" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/02/05/Krabi-Trip/">在Krabi过春节</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="第二次出国旅行，在这个年味减淡的春节"><a href="#第二次出国旅行，在这个年味减淡的春节" class="headerlink" title="第二次出国旅行，在这个年味减淡的春节"></a>第二次出国旅行，在这个年味减淡的春节</h2><h3 id="Krabi甲米"><a href="#Krabi甲米" class="headerlink" title="Krabi甲米"></a>Krabi甲米</h3><p>第一次开启如此温暖的春节过节模式</p>
+<img src="http://ohx9w4r3g.bkt.clouddn.com/201701/Krabi/DSC_4806.jpg" width="640">
+<p>在机场也有过年气氛</p>
+<img src="http://ohx9w4r3g.bkt.clouddn.com/201701/Krabi/DSC_4766.jpg" width="640">
+<img src="http://ohx9w4r3g.bkt.clouddn.com/201701/Krabi/DSC_4791.jpg" width="640">
+<p>飞机！这次见到飞机要比上次去日本兴奋很多</p>
+<img src="http://ohx9w4r3g.bkt.clouddn.com/201701/Krabi/DSC_4750.jpg" width="640">
+<p>在海滩上玩的好HIGH</p>
+<img src="http://ohx9w4r3g.bkt.clouddn.com/201701/Krabi/DSC_4830.jpg" width="640">
+<p><br><br><img src="http://ohx9w4r3g.bkt.clouddn.com/201701/Krabi/DSC_4833.jpg" width="640"><br><br><br><img src="http://ohx9w4r3g.bkt.clouddn.com/201701/Krabi/DSC_4837.jpg" width="640"><br><br><br><img src="http://ohx9w4r3g.bkt.clouddn.com/201701/Krabi/DSC_4927.jpg" width="640"><br><br><br><img src="http://ohx9w4r3g.bkt.clouddn.com/201701/Krabi/DSC_4881.jpg" width="640"><br><img src="http://ohx9w4r3g.bkt.clouddn.com/201701/Krabi/DSC_4895.jpg" width="640"></p>
+<p>第一次近距离接触小猴子</p>
+<img src="http://ohx9w4r3g.bkt.clouddn.com/201701/Krabi/DSC_5027.jpg" width="640">
+<img src="http://ohx9w4r3g.bkt.clouddn.com/201701/Krabi/DSC_5035.jpg" width="640">
+<p><br></p>
+<img src="http://ohx9w4r3g.bkt.clouddn.com/201701/Krabi/DSC_5040.jpg" width="640">
+<img src="http://ohx9w4r3g.bkt.clouddn.com/201701/Krabi/DSC_5042.jpg" width="640">
+<h3 id="一切的体验，都是你成长路上的伙伴"><a href="#一切的体验，都是你成长路上的伙伴" class="headerlink" title="一切的体验，都是你成长路上的伙伴"></a>一切的体验，都是你成长路上的伙伴</h3>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/02/05/Krabi-Trip/" class="archive-article-date">
+  	<time datetime="2017-02-05T13:46:12.915Z" itemprop="datePublished"><i class="icon-clock"></i>2017-02-05</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Family/">Family</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Krabi/">Krabi</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Photography/">Photography</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-QT-On-Yocto" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -689,60 +754,6 @@ Cloud &lt;-&gt; Board router &lt;-&gt; Nodes (things connected)
 
 
   
-    <article id="post-Thread-In-Kernel" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2007/01/07/Thread-In-Kernel/">Thread supported in Kernel</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>最近QA报来的一个bug，引发了我对2.6.x linux线程实现的兴趣。以前一直以为pthread只是简单的利用clone() syscall来实现，2.4和2.6的kernel在这方面应该没有什么大改进。可稍微研究一下，才发现自己错了。<br>Linux 2.6.x kernel 加入了对POSIX标准线程的支持。而在应用层，有LinuxThread和NPTL两个不同的库，不过接口都一样，库名也都是pthread。LinuxThread是比较早的pthread实现，在glibc 2.2.x里都有集成；而NPTL(Native POSIX Thread Library)则是Linux 线程的一个新实现，它克服了 LinuxThreads的缺点，同时也符合 POSIX 的需求。与 LinuxThreads 相比，它在性能和稳定性方面都提供了重大的改进，一般都被包含在glibc 2.3.x里。以下是NPTL相对于LinuxThread实现的优点：</p>
-<ol>
-<li>NPTL没有使用管理线程。管理线程的一些需求，例如向作为进程一部分的所有线程发送终止信号，是并不需要的；因为内核本身就可以实现这些功能。内核还会处理每个<br>线程堆栈所使用的内存的回收工作。它甚至还通过在清除父线程之前进行等待，从而实现对所有线程结束的管理，这样可以避免僵尸进程的问题。
-        <p class="article-more-link">
-          <a class="article-more-a"  href="/2007/01/07/Thread-In-Kernel/#more">more >></a>
-        </p>
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2007/01/07/Thread-In-Kernel/" class="archive-article-date">
-  	<time datetime="2007-01-07T05:00:00.000Z" itemprop="datePublished"><i class="icon-clock"></i>2007-01-07</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Kernel/">Kernel</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux/">Linux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Thread/">Thread</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
@@ -806,7 +817,7 @@ Cloud &lt;-&gt; Board router &lt;-&gt; Nodes (things connected)
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Blocking/" style="font-size: 10px;">Blocking</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/Clocksource/" style="font-size: 10px;">Clocksource</a> <a href="/tags/DTLS/" style="font-size: 10px;">DTLS</a> <a href="/tags/Embeded/" style="font-size: 10px;">Embeded</a> <a href="/tags/FTP/" style="font-size: 10px;">FTP</a> <a href="/tags/Family/" style="font-size: 10px;">Family</a> <a href="/tags/HRTimer/" style="font-size: 10px;">HRTimer</a> <a href="/tags/Hangzhou/" style="font-size: 10px;">Hangzhou</a> <a href="/tags/IoT/" style="font-size: 15px;">IoT</a> <a href="/tags/Kernel/" style="font-size: 17.5px;">Kernel</a> <a href="/tags/Linux/" style="font-size: 20px;">Linux</a> <a href="/tags/Memory/" style="font-size: 10px;">Memory</a> <a href="/tags/Netfilter/" style="font-size: 12.5px;">Netfilter</a> <a href="/tags/Photography/" style="font-size: 10px;">Photography</a> <a href="/tags/Python/" style="font-size: 10px;">Python</a> <a href="/tags/QT/" style="font-size: 10px;">QT</a> <a href="/tags/RTOS/" style="font-size: 12.5px;">RTOS</a> <a href="/tags/TCP/" style="font-size: 10px;">TCP</a> <a href="/tags/Thread/" style="font-size: 12.5px;">Thread</a> <a href="/tags/Timekeeping/" style="font-size: 10px;">Timekeeping</a> <a href="/tags/Yocto/" style="font-size: 10px;">Yocto</a> <a href="/tags/buddy/" style="font-size: 10px;">buddy</a> <a href="/tags/handshake/" style="font-size: 10px;">handshake</a> <a href="/tags/i-MX6/" style="font-size: 10px;">i.MX6</a> <a href="/tags/mbed/" style="font-size: 10px;">mbed</a> <a href="/tags/mbedOS/" style="font-size: 10px;">mbedOS</a> <a href="/tags/mbedTLS/" style="font-size: 10px;">mbedTLS</a> <a href="/tags/豆芽保姆/" style="font-size: 10px;">豆芽保姆</a>
+    				<a href="/tags/Blocking/" style="font-size: 10px;">Blocking</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/Clocksource/" style="font-size: 10px;">Clocksource</a> <a href="/tags/DTLS/" style="font-size: 10px;">DTLS</a> <a href="/tags/Embeded/" style="font-size: 10px;">Embeded</a> <a href="/tags/FTP/" style="font-size: 10px;">FTP</a> <a href="/tags/Family/" style="font-size: 12.5px;">Family</a> <a href="/tags/HRTimer/" style="font-size: 10px;">HRTimer</a> <a href="/tags/Hangzhou/" style="font-size: 10px;">Hangzhou</a> <a href="/tags/IoT/" style="font-size: 15px;">IoT</a> <a href="/tags/Kernel/" style="font-size: 17.5px;">Kernel</a> <a href="/tags/Krabi/" style="font-size: 10px;">Krabi</a> <a href="/tags/Linux/" style="font-size: 20px;">Linux</a> <a href="/tags/Memory/" style="font-size: 10px;">Memory</a> <a href="/tags/Netfilter/" style="font-size: 12.5px;">Netfilter</a> <a href="/tags/Photography/" style="font-size: 12.5px;">Photography</a> <a href="/tags/Python/" style="font-size: 10px;">Python</a> <a href="/tags/QT/" style="font-size: 10px;">QT</a> <a href="/tags/RTOS/" style="font-size: 12.5px;">RTOS</a> <a href="/tags/TCP/" style="font-size: 10px;">TCP</a> <a href="/tags/Thread/" style="font-size: 12.5px;">Thread</a> <a href="/tags/Timekeeping/" style="font-size: 10px;">Timekeeping</a> <a href="/tags/Yocto/" style="font-size: 10px;">Yocto</a> <a href="/tags/buddy/" style="font-size: 10px;">buddy</a> <a href="/tags/handshake/" style="font-size: 10px;">handshake</a> <a href="/tags/i-MX6/" style="font-size: 10px;">i.MX6</a> <a href="/tags/mbed/" style="font-size: 10px;">mbed</a> <a href="/tags/mbedOS/" style="font-size: 10px;">mbedOS</a> <a href="/tags/mbedTLS/" style="font-size: 10px;">mbedTLS</a> <a href="/tags/豆芽保姆/" style="font-size: 10px;">豆芽保姆</a>
     			</div>
     	</section>
     
