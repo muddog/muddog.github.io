@@ -145,6 +145,59 @@
       <div class="body-wrap">
         
   
+    <article id="post-Kernel-Memory-Allocation" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2007/04/08/Kernel-Memory-Allocation/">Kernel中的内存分配方式</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>这周BSP那边碰到一个蛮严重的issue： 循环放电影，v4l2 output driver的 dma_alloc很容易就失败，kernel panic，dump出当前buddy系统的状态。<br>初步分析是由于内存fragment导致没有足够大的连续内存分配给v4l output driver。开始debug<br>首先通过/proc/buddyinfo 在播放电影时候不间断的dump buddy状态，发现大块内存块：256K － 4MB block 减少的很迅速，1－2小时后，buddy中就不存在大块连续内存。这证明了初步分析是正确的，但是还不知道是谁导致了fragment，是应用层，还是v4l2 driver本身？<br>接下来添加一个NORMAL zone（ARM体系中就DMA一个zone，所以application和dma都使用一个buddy系统），让普通内存分配和dma隔开。继续测试，发现dma zone中的内存块状态在最初很正常，但NORMAL zone的内存却在急剧减少，最终NORMAL zone已经没有足够内存给application，kernel转而向DMA zone申请，最终issue重现。</p>
+<p>现在问题很清楚了，application发生内存leak，很严重的leak。但是dma_alloc这边会没有问题马？Fred在看了我描述的问题后，指出了dma_alloc中算法的一些问题：当向buddy申请完足够size的2^的内存块后，该函数会释放在申请块中多余的page，加速了fragment。后来我们做了一个实验，将dma_alloc里的释放多余页的功能去掉，fragment的速度大大减缓。<br>经过上周对这个issue的研究，我开始重新总结kernel里对内存分配的方式和方法，总结如下：</p>
+        <p class="article-more-link">
+          <a class="article-more-a"  href="/2007/04/08/Kernel-Memory-Allocation/#more">more >></a>
+        </p>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2007/04/08/Kernel-Memory-Allocation/" class="archive-article-date">
+  	<time datetime="2007-04-08T05:00:00.000Z" itemprop="datePublished"><i class="icon-clock"></i>2007-04-08</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Cache/">Cache</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Kernel/">Kernel</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux/">Linux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Memory/">Memory</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/buddy/">buddy</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-Thread-In-Kernel" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -419,7 +472,7 @@
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Blocking/" style="font-size: 10px;">Blocking</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/Clocksource/" style="font-size: 10px;">Clocksource</a> <a href="/tags/DTLS/" style="font-size: 10px;">DTLS</a> <a href="/tags/Embeded/" style="font-size: 10px;">Embeded</a> <a href="/tags/FTP/" style="font-size: 10px;">FTP</a> <a href="/tags/Family/" style="font-size: 12.5px;">Family</a> <a href="/tags/HRTimer/" style="font-size: 10px;">HRTimer</a> <a href="/tags/Hangzhou/" style="font-size: 10px;">Hangzhou</a> <a href="/tags/IoT/" style="font-size: 15px;">IoT</a> <a href="/tags/Kernel/" style="font-size: 17.5px;">Kernel</a> <a href="/tags/Krabi/" style="font-size: 10px;">Krabi</a> <a href="/tags/Linux/" style="font-size: 20px;">Linux</a> <a href="/tags/Memory/" style="font-size: 10px;">Memory</a> <a href="/tags/Netfilter/" style="font-size: 12.5px;">Netfilter</a> <a href="/tags/Photography/" style="font-size: 12.5px;">Photography</a> <a href="/tags/Python/" style="font-size: 10px;">Python</a> <a href="/tags/QT/" style="font-size: 10px;">QT</a> <a href="/tags/RTOS/" style="font-size: 12.5px;">RTOS</a> <a href="/tags/TCP/" style="font-size: 10px;">TCP</a> <a href="/tags/Thread/" style="font-size: 12.5px;">Thread</a> <a href="/tags/Timekeeping/" style="font-size: 10px;">Timekeeping</a> <a href="/tags/Yocto/" style="font-size: 10px;">Yocto</a> <a href="/tags/buddy/" style="font-size: 10px;">buddy</a> <a href="/tags/handshake/" style="font-size: 10px;">handshake</a> <a href="/tags/i-MX6/" style="font-size: 10px;">i.MX6</a> <a href="/tags/mbed/" style="font-size: 10px;">mbed</a> <a href="/tags/mbedOS/" style="font-size: 10px;">mbedOS</a> <a href="/tags/mbedTLS/" style="font-size: 10px;">mbedTLS</a> <a href="/tags/豆芽保姆/" style="font-size: 10px;">豆芽保姆</a>
+    				<a href="/tags/Blocking/" style="font-size: 10px;">Blocking</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/Clocksource/" style="font-size: 10px;">Clocksource</a> <a href="/tags/DTLS/" style="font-size: 10px;">DTLS</a> <a href="/tags/Embeded/" style="font-size: 10px;">Embeded</a> <a href="/tags/FTP/" style="font-size: 10px;">FTP</a> <a href="/tags/Family/" style="font-size: 12.5px;">Family</a> <a href="/tags/Gstreamer/" style="font-size: 10px;">Gstreamer</a> <a href="/tags/HRTimer/" style="font-size: 10px;">HRTimer</a> <a href="/tags/Hangzhou/" style="font-size: 10px;">Hangzhou</a> <a href="/tags/IoT/" style="font-size: 15px;">IoT</a> <a href="/tags/Kernel/" style="font-size: 17.5px;">Kernel</a> <a href="/tags/Krabi/" style="font-size: 10px;">Krabi</a> <a href="/tags/Linux/" style="font-size: 20px;">Linux</a> <a href="/tags/Memory/" style="font-size: 10px;">Memory</a> <a href="/tags/Netfilter/" style="font-size: 12.5px;">Netfilter</a> <a href="/tags/Photography/" style="font-size: 12.5px;">Photography</a> <a href="/tags/Python/" style="font-size: 10px;">Python</a> <a href="/tags/QT/" style="font-size: 12.5px;">QT</a> <a href="/tags/RTOS/" style="font-size: 12.5px;">RTOS</a> <a href="/tags/TCP/" style="font-size: 10px;">TCP</a> <a href="/tags/Thread/" style="font-size: 12.5px;">Thread</a> <a href="/tags/Timekeeping/" style="font-size: 10px;">Timekeeping</a> <a href="/tags/Yocto/" style="font-size: 10px;">Yocto</a> <a href="/tags/buddy/" style="font-size: 10px;">buddy</a> <a href="/tags/handshake/" style="font-size: 10px;">handshake</a> <a href="/tags/i-MX6/" style="font-size: 10px;">i.MX6</a> <a href="/tags/mbed/" style="font-size: 10px;">mbed</a> <a href="/tags/mbedOS/" style="font-size: 10px;">mbedOS</a> <a href="/tags/mbedTLS/" style="font-size: 10px;">mbedTLS</a> <a href="/tags/豆芽保姆/" style="font-size: 10px;">豆芽保姆</a>
     			</div>
     	</section>
     

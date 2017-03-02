@@ -6,87 +6,23 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://muddog.github.io">
-  <title>在Krabi过春节 | MudDog</title>
+  <title>QT二维码扫码应用（i.MX6UL） | MudDog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="第二次出国旅行，在这个年味减淡的春节Krabi甲米第一次开启如此温暖的春节过节模式
-
-在机场也有过年气氛
-
-
-飞机！这次见到飞机要比上次去日本兴奋很多
-
-在海滩上玩的好HIGH
-
-
-
-
-
-第一次近距离接触小猴子
-
-
-
-
-一切的体验，都是你成长路上的伙伴">
+  <meta name="description" content="引子去年年底还在裸写寄存器编程，今年就开始回归到Linux，还玩起了QT。这个跨度真是大啊。第一任务是在i.MX6UL/ULL上用Yocto做一个参考的带QT开发环境的镜像，并且在该环境下写个二维码扫码应用。虽然一开始接触Yocto，还是蛮陌生的，花了点时间，中间关于QCamera的支持上还绕了点弯路。但总算顺利搞定。
+i.MX6UL属于i.MX系列中相对低端的AP，528Mhz的主频（6ULL会">
 <meta property="og:type" content="article">
-<meta property="og:title" content="在Krabi过春节">
-<meta property="og:url" content="http://muddog.github.io/2017/02/05/Krabi-Trip/index.html">
+<meta property="og:title" content="QT二维码扫码应用（i.MX6UL）">
+<meta property="og:url" content="http://muddog.github.io/2017/03/02/QRScanner-QT/index.html">
 <meta property="og:site_name" content="MudDog">
-<meta property="og:description" content="第二次出国旅行，在这个年味减淡的春节Krabi甲米第一次开启如此温暖的春节过节模式
-
-在机场也有过年气氛
-
-
-飞机！这次见到飞机要比上次去日本兴奋很多
-
-在海滩上玩的好HIGH
-
-
-
-
-
-第一次近距离接触小猴子
-
-
-
-
-一切的体验，都是你成长路上的伙伴">
-<meta property="og:image" content="http://ohx9w4r3g.bkt.clouddn.com/201701/Krabi/DSC_4806.jpg">
-<meta property="og:image" content="http://ohx9w4r3g.bkt.clouddn.com/201701/Krabi/DSC_4766.jpg">
-<meta property="og:image" content="http://ohx9w4r3g.bkt.clouddn.com/201701/Krabi/DSC_4791.jpg">
-<meta property="og:image" content="http://ohx9w4r3g.bkt.clouddn.com/201701/Krabi/DSC_4750.jpg">
-<meta property="og:image" content="http://ohx9w4r3g.bkt.clouddn.com/201701/Krabi/DSC_4830.jpg">
-<meta property="og:image" content="http://ohx9w4r3g.bkt.clouddn.com/201701/Krabi/DSC_4833.jpg">
-<meta property="og:image" content="http://ohx9w4r3g.bkt.clouddn.com/201701/Krabi/DSC_4837.jpg">
-<meta property="og:image" content="http://ohx9w4r3g.bkt.clouddn.com/201701/Krabi/DSC_4927.jpg">
-<meta property="og:image" content="http://ohx9w4r3g.bkt.clouddn.com/201701/Krabi/DSC_4981.jpg">
-<meta property="og:image" content="http://ohx9w4r3g.bkt.clouddn.com/201701/Krabi/DSC_4995.jpg">
-<meta property="og:image" content="http://ohx9w4r3g.bkt.clouddn.com/201701/Krabi/DSC_5027.jpg">
-<meta property="og:image" content="http://ohx9w4r3g.bkt.clouddn.com/201701/Krabi/DSC_5035.jpg">
-<meta property="og:image" content="http://ohx9w4r3g.bkt.clouddn.com/201701/Krabi/DSC_5040.jpg">
-<meta property="og:image" content="http://ohx9w4r3g.bkt.clouddn.com/201701/Krabi/DSC_5042.jpg">
-<meta property="og:updated_time" content="2017-03-02T14:22:30.977Z">
+<meta property="og:description" content="引子去年年底还在裸写寄存器编程，今年就开始回归到Linux，还玩起了QT。这个跨度真是大啊。第一任务是在i.MX6UL/ULL上用Yocto做一个参考的带QT开发环境的镜像，并且在该环境下写个二维码扫码应用。虽然一开始接触Yocto，还是蛮陌生的，花了点时间，中间关于QCamera的支持上还绕了点弯路。但总算顺利搞定。
+i.MX6UL属于i.MX系列中相对低端的AP，528Mhz的主频（6ULL会">
+<meta property="og:image" content="https://community.nxp.com/servlet/JiveServlet/downloadImage/102-333910-1-177984/screenshot-qrscanner.png">
+<meta property="og:updated_time" content="2017-03-02T14:24:05.309Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="在Krabi过春节">
-<meta name="twitter:description" content="第二次出国旅行，在这个年味减淡的春节Krabi甲米第一次开启如此温暖的春节过节模式
-
-在机场也有过年气氛
-
-
-飞机！这次见到飞机要比上次去日本兴奋很多
-
-在海滩上玩的好HIGH
-
-
-
-
-
-第一次近距离接触小猴子
-
-
-
-
-一切的体验，都是你成长路上的伙伴">
-<meta name="twitter:image" content="http://ohx9w4r3g.bkt.clouddn.com/201701/Krabi/DSC_4806.jpg">
+<meta name="twitter:title" content="QT二维码扫码应用（i.MX6UL）">
+<meta name="twitter:description" content="引子去年年底还在裸写寄存器编程，今年就开始回归到Linux，还玩起了QT。这个跨度真是大啊。第一任务是在i.MX6UL/ULL上用Yocto做一个参考的带QT开发环境的镜像，并且在该环境下写个二维码扫码应用。虽然一开始接触Yocto，还是蛮陌生的，花了点时间，中间关于QCamera的支持上还绕了点弯路。但总算顺利搞定。
+i.MX6UL属于i.MX系列中相对低端的AP，528Mhz的主频（6ULL会">
+<meta name="twitter:image" content="https://community.nxp.com/servlet/JiveServlet/downloadImage/102-333910-1-177984/screenshot-qrscanner.png">
   
     <link rel="alternative" href="/atom.xml" title="MudDog" type="application/atom+xml">
   
@@ -213,7 +149,7 @@
 </nav>
 
       <div class="body-wrap">
-        <article id="post-Krabi-Trip" class="article article-type-post" itemscope itemprop="blogPost">
+        <article id="post-QRScanner-QT" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <input type="hidden" class="isFancy" />
@@ -223,7 +159,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      在Krabi过春节
+      QT二维码扫码应用（i.MX6UL）
     </h1>
   
 
@@ -231,36 +167,31 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h2 id="第二次出国旅行，在这个年味减淡的春节"><a href="#第二次出国旅行，在这个年味减淡的春节" class="headerlink" title="第二次出国旅行，在这个年味减淡的春节"></a>第二次出国旅行，在这个年味减淡的春节</h2><h3 id="Krabi甲米"><a href="#Krabi甲米" class="headerlink" title="Krabi甲米"></a>Krabi甲米</h3><p>第一次开启如此温暖的春节过节模式</p>
-<img src="http://ohx9w4r3g.bkt.clouddn.com/201701/Krabi/DSC_4806.jpg" width="960">
-<p>在机场也有过年气氛</p>
-<img src="http://ohx9w4r3g.bkt.clouddn.com/201701/Krabi/DSC_4766.jpg" width="480">
-<img src="http://ohx9w4r3g.bkt.clouddn.com/201701/Krabi/DSC_4791.jpg" width="480">
-<p>飞机！这次见到飞机要比上次去日本兴奋很多</p>
-<img src="http://ohx9w4r3g.bkt.clouddn.com/201701/Krabi/DSC_4750.jpg" width="960">
-<p>在海滩上玩的好HIGH</p>
-<img src="http://ohx9w4r3g.bkt.clouddn.com/201701/Krabi/DSC_4830.jpg" width="960">
-<img src="http://ohx9w4r3g.bkt.clouddn.com/201701/Krabi/DSC_4833.jpg" width="960">
-<img src="http://ohx9w4r3g.bkt.clouddn.com/201701/Krabi/DSC_4837.jpg" width="960">
-<img src="http://ohx9w4r3g.bkt.clouddn.com/201701/Krabi/DSC_4927.jpg" width="960">
-<p><br><br><img src="http://ohx9w4r3g.bkt.clouddn.com/201701/Krabi/DSC_4981.jpg" width="480"><br><img src="http://ohx9w4r3g.bkt.clouddn.com/201701/Krabi/DSC_4995.jpg" width="480"></p>
-<p>第一次近距离接触小猴子</p>
-<img src="http://ohx9w4r3g.bkt.clouddn.com/201701/Krabi/DSC_5027.jpg" width="480">
-<img src="http://ohx9w4r3g.bkt.clouddn.com/201701/Krabi/DSC_5035.jpg" width="480">
-<img src="http://ohx9w4r3g.bkt.clouddn.com/201701/Krabi/DSC_5040.jpg" width="480">
-<img src="http://ohx9w4r3g.bkt.clouddn.com/201701/Krabi/DSC_5042.jpg" width="480">
-<h3 id="一切的体验，都是你成长路上的伙伴"><a href="#一切的体验，都是你成长路上的伙伴" class="headerlink" title="一切的体验，都是你成长路上的伙伴"></a>一切的体验，都是你成长路上的伙伴</h3>
+        <h1 id="引子"><a href="#引子" class="headerlink" title="引子"></a>引子</h1><p>去年年底还在裸写寄存器编程，今年就开始回归到Linux，还玩起了QT。这个跨度真是大啊。第一任务是在i.MX6UL/ULL上用Yocto做一个参考的带QT开发环境的镜像，并且在该环境下写个二维码扫码应用。虽然一开始接触Yocto，还是蛮陌生的，花了点时间，中间关于QCamera的支持上还绕了点弯路。但总算顺利搞定。</p>
+<p>i.MX6UL属于i.MX系列中相对低端的AP，528Mhz的主频（6ULL会有1GHz），摄像头接口，2D硬件加速（例如CSC/FLIP/ROTATION），并且带有LCD显示。可以广泛应用于工业市场，特别是工控HMI，做简单的人机界面。HMI不需要3D渲染加速，但需要有一个能够简单上手的GUI开发环境，所以Linux + QT相当的适合。并且随着线上、线下互动的增强，移动支付，产线物流物品的追溯和管理，二维码扫码的应用也使用的越来越广泛。所以QT加上一个二维码扫码的应用对于在工业市场上的推广比较有利。</p>
+<p>之前的博文也提到了如何去搭建一个完整的QT开发环境，以及ROOTFS。也可以参见这里：<a href="https://community.nxp.com/docs/DOC-333580" target="_blank" rel="external">https://community.nxp.com/docs/DOC-333580</a></p>
+<h1 id="开源代码"><a href="#开源代码" class="headerlink" title="开源代码"></a>开源代码</h1><p>目前的这个二维码扫码应用程序（QRScanner），是基于QT5.6 + QZXing开发的，可以跑在i.MX6UL EVK板子上。测试用的是UVC的摄像头（640x480分辨率），480x272的标配LCD。</p>
+<p>代码开源在我的Github上：<a href="https://github.com/muddog/QRScanner" target="_blank" rel="external">https://github.com/muddog/QRScanner</a> </p>
+<h1 id="截图"><a href="#截图" class="headerlink" title="截图"></a>截图</h1><p><img src="https://community.nxp.com/servlet/JiveServlet/downloadImage/102-333910-1-177984/screenshot-qrscanner.png" alt=""></p>
+<h1 id="应用的实现"><a href="#应用的实现" class="headerlink" title="应用的实现"></a>应用的实现</h1><h2 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h2><p>做这种多媒体的应用，特别是和摄像头、视频显示相关的，你肯定会第一个想到使用Gstreamer。没错！其实一个简单的命令就可以验证你的思路。例如在6UL上做摄像头的预览(viewfinder)，并且用PXP做YUV-&gt;RGB的转换，及Scale：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ gst-launch-1.0 v4l2src device=/dev/video1 ! video/x-raw,format=YUY2,width=640,height=320 ! imxvideoconvert_pxp ! video/x-raw,format=RGB16 ! waylandsink</div></pre></td></tr></table></figure></p>
+<p>CPU的loading大概在20-30%，但如果不用PXP做加速，那么loading大概在50-60%。所以肯定需要加速啦。但还有个问题，既然我们用了QT，QT是否有可以直接用的组件呢？查了下Qtmultimedia，有个QCamera类，底下的实现在Linux上是基于Gstreamer的，看似很美好啊，我们可以直接用QCamera么？答案是可以，但性能太差，待会儿会讲到。所以绕了这个弯路后，终于回到了原点，还是老老实实利用GStreamer的API来实现吧。Appsink可以将获取的摄像头桢数据传给应用程序，所以，我们的目标就是建立类似上面的pipeline，并把waylandsink替换成appsink。</p>
+<h2 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h2><p>代码很简单，实现几个类：<br>-<strong>ScannerQWidgetSink</strong><br>利用Gst appsink实现一个做视频预览的sink。初始化Gstreamer pipeline，创建一个定时器，每隔一段时间（50ms）将从摄像头获取的桢，用appsink API拷贝到内部的buffer，并且通知做预览的Widget更新界面（ViewfinderWidget redraw）</p>
+<p>-<strong>ViewfinderWidget</strong><br>继承自QWidget，实现将appsink取来的桢打包成一个QImage实例，并且使用QPainter画到自己的surface上。</p>
+<p>-<strong>MainWindow</strong><br>主界面类，没有边框和标题栏，全屏。在界面左半边实例化了ViewfinderWidget，右边实例化一个QLabel来显示扫码结果。并且利用动画在预览Widget上绘制红色扫码线动画。</p>
+<p>-<strong>DecoderThread</strong><br>独立线程。等待ScannerQWidgetSink每0.5s释放一帧图像资源，然后将该数据拷贝到自己的buffer里，送给QZXing引擎做二维码解析。最后将结果显示在QLabel实例上。</p>
+<h2 id="为什么不用QCamera"><a href="#为什么不用QCamera" class="headerlink" title="为什么不用QCamera"></a>为什么不用QCamera</h2><p>QCamera用的是Gstreamer bad plugins里的camerabin2，这个BIN消耗的资源特别大，对于Preview，Image Capture，Video Recording各有三套不同的pipeline，还有一波proxy PAD，而且PAD都用的是纯软件的。光pipeline negoation就要花半天，更别说跑起来的速度，在没有PXP的加速下Preview CPU就要耗掉60-70%。我试图在Camerabin2的viewfinder pipeline里用imxvideoconvert_pxp替代videoconvert来加速CSC, Scale，但是始终会出错整个pipeline停止。这个问题找了我将近1个多礼拜。后来发现Qtmultimedia在处理非xcb的platform时候，不会用到Gstreamer内的sink来做显示加速。而使用自己写的qgstvideorendersink类来实现sink，可该sink有bug，会和需要render的widget不同步，导致自己报错。找了个workaround后，CPU loading降了下来，但后面image capture问题又来了，取一帧数据速度实在太慢，好几秒，根本无法接受。所以干脆放弃，还是直接自己建gst pipeline得了。</p>
+
       
     </div>
     <div class="article-info article-info-index">
       
-      <a href="/2017/02/05/Krabi-Trip/" class="archive-article-date">
-  	<time datetime="2017-02-05T13:46:12.915Z" itemprop="datePublished"><i class="icon-clock"></i>2017-02-05</time>
+      <a href="/2017/03/02/QRScanner-QT/" class="archive-article-date">
+  	<time datetime="2017-03-02T14:22:30.921Z" itemprop="datePublished"><i class="icon-clock"></i>2017-03-02</time>
 </a>
       
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Family/">Family</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Krabi/">Krabi</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Photography/">Photography</a></li></ul>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Gstreamer/">Gstreamer</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux/">Linux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/QT/">QT</a></li></ul>
 	</div>
 
       
@@ -273,18 +204,9 @@
   
 <nav id="article-nav">
   
-    <a href="/2017/03/02/QRScanner-QT/" id="article-nav-newer" class="article-nav-link-wrap">
-      <i class="icon-circle-left"></i>
-      <div class="article-nav-title">
-        
-          QT二维码扫码应用（i.MX6UL）
-        
-      </div>
-    </a>
   
-  
-    <a href="/2017/01/02/QT-On-Yocto/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">Enable QT developement for i.MX6UL</div>
+    <a href="/2017/02/05/Krabi-Trip/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">在Krabi过春节</div>
       <i class="icon-circle-right"></i>
     </a>
   
@@ -318,7 +240,7 @@
 
 <div class="duoshuo">
 	<!-- 多说评论框 start -->
-	<div class="ds-thread" data-thread-key="Krabi-Trip" data-title="在Krabi过春节" data-url="http://muddog.github.io/2017/02/05/Krabi-Trip/"></div>
+	<div class="ds-thread" data-thread-key="QRScanner-QT" data-title="QT二维码扫码应用（i.MX6UL）" data-url="http://muddog.github.io/2017/03/02/QRScanner-QT/"></div>
 	<!-- 多说评论框 end -->
 	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
 	<script type="text/javascript">

@@ -145,6 +145,68 @@
       <div class="body-wrap">
         
   
+    <article id="post-QRScanner-QT" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/03/02/QRScanner-QT/">QT二维码扫码应用（i.MX6UL）</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="引子"><a href="#引子" class="headerlink" title="引子"></a>引子</h1><p>去年年底还在裸写寄存器编程，今年就开始回归到Linux，还玩起了QT。这个跨度真是大啊。第一任务是在i.MX6UL/ULL上用Yocto做一个参考的带QT开发环境的镜像，并且在该环境下写个二维码扫码应用。虽然一开始接触Yocto，还是蛮陌生的，花了点时间，中间关于QCamera的支持上还绕了点弯路。但总算顺利搞定。</p>
+<p>i.MX6UL属于i.MX系列中相对低端的AP，528Mhz的主频（6ULL会有1GHz），摄像头接口，2D硬件加速（例如CSC/FLIP/ROTATION），并且带有LCD显示。可以广泛应用于工业市场，特别是工控HMI，做简单的人机界面。HMI不需要3D渲染加速，但需要有一个能够简单上手的GUI开发环境，所以Linux + QT相当的适合。并且随着线上、线下互动的增强，移动支付，产线物流物品的追溯和管理，二维码扫码的应用也使用的越来越广泛。所以QT加上一个二维码扫码的应用对于在工业市场上的推广比较有利。</p>
+<p>之前的博文也提到了如何去搭建一个完整的QT开发环境，以及ROOTFS。也可以参见这里：<a href="https://community.nxp.com/docs/DOC-333580" target="_blank" rel="external">https://community.nxp.com/docs/DOC-333580</a></p>
+<h1 id="开源代码"><a href="#开源代码" class="headerlink" title="开源代码"></a>开源代码</h1><p>目前的这个二维码扫码应用程序（QRScanner），是基于QT5.6 + QZXing开发的，可以跑在i.MX6UL EVK板子上。测试用的是UVC的摄像头（640x480分辨率），480x272的标配LCD。</p>
+<p>代码开源在我的Github上：<a href="https://github.com/muddog/QRScanner" target="_blank" rel="external">https://github.com/muddog/QRScanner</a> </p>
+<h1 id="截图"><a href="#截图" class="headerlink" title="截图"></a>截图</h1><p><img src="https://community.nxp.com/servlet/JiveServlet/downloadImage/102-333910-1-177984/screenshot-qrscanner.png" alt=""></p>
+<h1 id="应用的实现"><a href="#应用的实现" class="headerlink" title="应用的实现"></a>应用的实现</h1><h2 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h2><p>做这种多媒体的应用，特别是和摄像头、视频显示相关的，你肯定会第一个想到使用Gstreamer。没错！其实一个简单的命令就可以验证你的思路。例如在6UL上做摄像头的预览(viewfinder)，并且用PXP做YUV-&gt;RGB的转换，及Scale：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ gst-launch-1.0 v4l2src device=/dev/video1 ! video/x-raw,format=YUY2,width=640,height=320 ! imxvideoconvert_pxp ! video/x-raw,format=RGB16 ! waylandsink</div></pre></td></tr></table></figure></p>
+<p>CPU的loading大概在20-30%，但如果不用PXP做加速，那么loading大概在50-60%。所以肯定需要加速啦。但还有个问题，既然我们用了QT，QT是否有可以直接用的组件呢？查了下Qtmultimedia，有个QCamera类，底下的实现在Linux上是基于Gstreamer的，看似很美好啊，我们可以直接用QCamera么？答案是可以，但性能太差，待会儿会讲到。所以绕了这个弯路后，终于回到了原点，还是老老实实利用GStreamer的API来实现吧。Appsink可以将获取的摄像头桢数据传给应用程序，所以，我们的目标就是建立类似上面的pipeline，并把waylandsink替换成appsink。</p>
+<h2 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h2><p>代码很简单，实现几个类：<br>-<strong>ScannerQWidgetSink</strong><br>利用Gst appsink实现一个做视频预览的sink。初始化Gstreamer pipeline，创建一个定时器，每隔一段时间（50ms）将从摄像头获取的桢，用appsink API拷贝到内部的buffer，并且通知做预览的Widget更新界面（ViewfinderWidget redraw）</p>
+<p>-<strong>ViewfinderWidget</strong><br>继承自QWidget，实现将appsink取来的桢打包成一个QImage实例，并且使用QPainter画到自己的surface上。</p>
+<p>-<strong>MainWindow</strong><br>主界面类，没有边框和标题栏，全屏。在界面左半边实例化了ViewfinderWidget，右边实例化一个QLabel来显示扫码结果。并且利用动画在预览Widget上绘制红色扫码线动画。</p>
+<p>-<strong>DecoderThread</strong><br>独立线程。等待ScannerQWidgetSink每0.5s释放一帧图像资源，然后将该数据拷贝到自己的buffer里，送给QZXing引擎做二维码解析。最后将结果显示在QLabel实例上。</p>
+<h2 id="为什么不用QCamera"><a href="#为什么不用QCamera" class="headerlink" title="为什么不用QCamera"></a>为什么不用QCamera</h2><p>QCamera用的是Gstreamer bad plugins里的camerabin2，这个BIN消耗的资源特别大，对于Preview，Image Capture，Video Recording各有三套不同的pipeline，还有一波proxy PAD，而且PAD都用的是纯软件的。光pipeline negoation就要花半天，更别说跑起来的速度，在没有PXP的加速下Preview CPU就要耗掉60-70%。我试图在Camerabin2的viewfinder pipeline里用imxvideoconvert_pxp替代videoconvert来加速CSC, Scale，但是始终会出错整个pipeline停止。这个问题找了我将近1个多礼拜。后来发现Qtmultimedia在处理非xcb的platform时候，不会用到Gstreamer内的sink来做显示加速。而使用自己写的qgstvideorendersink类来实现sink，可该sink有bug，会和需要render的widget不同步，导致自己报错。找了个workaround后，CPU loading降了下来，但后面image capture问题又来了，取一帧数据速度实在太慢，好几秒，根本无法接受。所以干脆放弃，还是直接自己建gst pipeline得了。</p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/03/02/QRScanner-QT/" class="archive-article-date">
+  	<time datetime="2017-03-02T14:22:30.921Z" itemprop="datePublished"><i class="icon-clock"></i>2017-03-02</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Gstreamer/">Gstreamer</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux/">Linux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/QT/">QT</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-Krabi-Trip" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -703,59 +765,6 @@ Cloud &lt;-&gt; Board router &lt;-&gt; Nodes (things connected)
 
 
   
-    <article id="post-Kernel-Memory-Allocation" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2007/04/08/Kernel-Memory-Allocation/">Kernel中的内存分配方式</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>这周BSP那边碰到一个蛮严重的issue： 循环放电影，v4l2 output driver的 dma_alloc很容易就失败，kernel panic，dump出当前buddy系统的状态。<br>初步分析是由于内存fragment导致没有足够大的连续内存分配给v4l output driver。开始debug<br>首先通过/proc/buddyinfo 在播放电影时候不间断的dump buddy状态，发现大块内存块：256K － 4MB block 减少的很迅速，1－2小时后，buddy中就不存在大块连续内存。这证明了初步分析是正确的，但是还不知道是谁导致了fragment，是应用层，还是v4l2 driver本身？<br>接下来添加一个NORMAL zone（ARM体系中就DMA一个zone，所以application和dma都使用一个buddy系统），让普通内存分配和dma隔开。继续测试，发现dma zone中的内存块状态在最初很正常，但NORMAL zone的内存却在急剧减少，最终NORMAL zone已经没有足够内存给application，kernel转而向DMA zone申请，最终issue重现。</p>
-<p>现在问题很清楚了，application发生内存leak，很严重的leak。但是dma_alloc这边会没有问题马？Fred在看了我描述的问题后，指出了dma_alloc中算法的一些问题：当向buddy申请完足够size的2^的内存块后，该函数会释放在申请块中多余的page，加速了fragment。后来我们做了一个实验，将dma_alloc里的释放多余页的功能去掉，fragment的速度大大减缓。<br>经过上周对这个issue的研究，我开始重新总结kernel里对内存分配的方式和方法，总结如下：</p>
-        <p class="article-more-link">
-          <a class="article-more-a"  href="/2007/04/08/Kernel-Memory-Allocation/#more">more >></a>
-        </p>
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2007/04/08/Kernel-Memory-Allocation/" class="archive-article-date">
-  	<time datetime="2007-04-08T05:00:00.000Z" itemprop="datePublished"><i class="icon-clock"></i>2007-04-08</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Cache/">Cache</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Kernel/">Kernel</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux/">Linux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Memory/">Memory</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/buddy/">buddy</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
@@ -819,7 +828,7 @@ Cloud &lt;-&gt; Board router &lt;-&gt; Nodes (things connected)
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Blocking/" style="font-size: 10px;">Blocking</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/Clocksource/" style="font-size: 10px;">Clocksource</a> <a href="/tags/DTLS/" style="font-size: 10px;">DTLS</a> <a href="/tags/Embeded/" style="font-size: 10px;">Embeded</a> <a href="/tags/FTP/" style="font-size: 10px;">FTP</a> <a href="/tags/Family/" style="font-size: 12.5px;">Family</a> <a href="/tags/HRTimer/" style="font-size: 10px;">HRTimer</a> <a href="/tags/Hangzhou/" style="font-size: 10px;">Hangzhou</a> <a href="/tags/IoT/" style="font-size: 15px;">IoT</a> <a href="/tags/Kernel/" style="font-size: 17.5px;">Kernel</a> <a href="/tags/Krabi/" style="font-size: 10px;">Krabi</a> <a href="/tags/Linux/" style="font-size: 20px;">Linux</a> <a href="/tags/Memory/" style="font-size: 10px;">Memory</a> <a href="/tags/Netfilter/" style="font-size: 12.5px;">Netfilter</a> <a href="/tags/Photography/" style="font-size: 12.5px;">Photography</a> <a href="/tags/Python/" style="font-size: 10px;">Python</a> <a href="/tags/QT/" style="font-size: 10px;">QT</a> <a href="/tags/RTOS/" style="font-size: 12.5px;">RTOS</a> <a href="/tags/TCP/" style="font-size: 10px;">TCP</a> <a href="/tags/Thread/" style="font-size: 12.5px;">Thread</a> <a href="/tags/Timekeeping/" style="font-size: 10px;">Timekeeping</a> <a href="/tags/Yocto/" style="font-size: 10px;">Yocto</a> <a href="/tags/buddy/" style="font-size: 10px;">buddy</a> <a href="/tags/handshake/" style="font-size: 10px;">handshake</a> <a href="/tags/i-MX6/" style="font-size: 10px;">i.MX6</a> <a href="/tags/mbed/" style="font-size: 10px;">mbed</a> <a href="/tags/mbedOS/" style="font-size: 10px;">mbedOS</a> <a href="/tags/mbedTLS/" style="font-size: 10px;">mbedTLS</a> <a href="/tags/豆芽保姆/" style="font-size: 10px;">豆芽保姆</a>
+    				<a href="/tags/Blocking/" style="font-size: 10px;">Blocking</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/Clocksource/" style="font-size: 10px;">Clocksource</a> <a href="/tags/DTLS/" style="font-size: 10px;">DTLS</a> <a href="/tags/Embeded/" style="font-size: 10px;">Embeded</a> <a href="/tags/FTP/" style="font-size: 10px;">FTP</a> <a href="/tags/Family/" style="font-size: 12.5px;">Family</a> <a href="/tags/Gstreamer/" style="font-size: 10px;">Gstreamer</a> <a href="/tags/HRTimer/" style="font-size: 10px;">HRTimer</a> <a href="/tags/Hangzhou/" style="font-size: 10px;">Hangzhou</a> <a href="/tags/IoT/" style="font-size: 15px;">IoT</a> <a href="/tags/Kernel/" style="font-size: 17.5px;">Kernel</a> <a href="/tags/Krabi/" style="font-size: 10px;">Krabi</a> <a href="/tags/Linux/" style="font-size: 20px;">Linux</a> <a href="/tags/Memory/" style="font-size: 10px;">Memory</a> <a href="/tags/Netfilter/" style="font-size: 12.5px;">Netfilter</a> <a href="/tags/Photography/" style="font-size: 12.5px;">Photography</a> <a href="/tags/Python/" style="font-size: 10px;">Python</a> <a href="/tags/QT/" style="font-size: 12.5px;">QT</a> <a href="/tags/RTOS/" style="font-size: 12.5px;">RTOS</a> <a href="/tags/TCP/" style="font-size: 10px;">TCP</a> <a href="/tags/Thread/" style="font-size: 12.5px;">Thread</a> <a href="/tags/Timekeeping/" style="font-size: 10px;">Timekeeping</a> <a href="/tags/Yocto/" style="font-size: 10px;">Yocto</a> <a href="/tags/buddy/" style="font-size: 10px;">buddy</a> <a href="/tags/handshake/" style="font-size: 10px;">handshake</a> <a href="/tags/i-MX6/" style="font-size: 10px;">i.MX6</a> <a href="/tags/mbed/" style="font-size: 10px;">mbed</a> <a href="/tags/mbedOS/" style="font-size: 10px;">mbedOS</a> <a href="/tags/mbedTLS/" style="font-size: 10px;">mbedTLS</a> <a href="/tags/豆芽保姆/" style="font-size: 10px;">豆芽保姆</a>
     			</div>
     	</section>
     
